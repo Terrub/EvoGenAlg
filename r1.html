@@ -1,0 +1,284 @@
+<!doctype html><html><head>
+
+    <!-- Meta data stuff -->
+    <meta charset="utf-8" />
+    <title>experiment 6</title>
+    <script src="utils.js"></script>
+    <script src="display.js"></script>
+
+</head><body><script>
+
+///////////
+// Declarations
+
+    var display;
+    var entities;
+    var animating;
+
+    function getRandomColor() {
+
+        var colors;
+        var index;
+
+        colors = [
+            "white",    "gray",     "black",    "red",  "orange",
+            "yellow",   "green",    "cyan",     "blue", "purple"
+        ];
+        index = generateRandomNumber(0,colors.length);
+        color = colors[index];
+
+        return color;
+
+    }
+
+    function createEntity() {
+
+        var entity;
+
+        entity = {};
+
+        entity.x = generateRandomNumber(0, 800);
+        entity.y = generateRandomNumber(0, 600);
+
+        entity.color = getRandomColor();
+
+        entity.speed = generateRandomNumber(0, 10) * 0.2;
+
+        entity.status = 1;
+
+        return entity;
+
+    }
+
+    function getEntities(amount) {
+
+        var entities;
+
+        entities = [];
+
+        var i = 0;
+        var n = amount;
+
+        for ( i; i < n; i += 1 ) {
+
+            entities[i] = createEntity();
+
+        }
+
+        return entities;
+
+    }
+
+    function createEntities(amount) {
+
+        entities = getEntities(amount);
+
+    }
+
+    function createDisplay() {
+
+        display = getDisplay();
+
+    }
+
+    function load() {
+
+        createDisplay();
+        createEntities(10);
+    }
+
+// ----
+
+    function getRandomDirection() {
+
+        var directions;
+        var index;
+        var direction;
+
+        directions = [
+            {x:-1, y:-1},
+            {x: 1, y:-1},
+            {x:-1, y: 1},
+            {x: 1, y: 1},
+        ];
+
+        index = generateRandomNumber(0, 4);
+
+        direction = directions[index];
+
+        return direction;
+
+    }
+
+    function moveEntity(entity) {
+
+        var direction;
+
+        direction = getRandomDirection();
+
+        entity.x += entity.speed * direction.x;
+        entity.y += entity.speed * direction.y;
+
+    }
+
+    function updateEntities(p_entities) {
+
+        var entity;
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            moveEntity(entity);
+
+        }
+
+    }
+
+    function isOutOfBounds(entity) {
+
+        return ( entity.x < 0 || entity.x > 800 || entity.y < 0 || entity.y > 600 );
+
+    }
+
+    function kill(entity) {
+
+        entity.status = 0;
+
+    }
+
+    function updateEntitiesDamage(p_entities) {
+
+        var entity;
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            if (isOutOfBounds(entity)) {
+                kill(entity);
+            }
+
+        }
+
+    }
+
+    function getAliveEntities(p_entities) {
+
+        var entities;
+        var entity;
+
+        var entities = [];
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            if (entity.status !== 0) {
+                entities.push(entity);
+            }
+
+        }
+
+        return entities;
+
+    }
+
+    function updateValues() {
+
+        updateEntities(entities);
+
+        updateEntitiesDamage(entities);
+
+        entities = getAliveEntities(entities);
+
+    }
+
+// ----
+
+    function drawBackground() {
+
+        display.fill("rgba(15, 15, 15, 1)");
+
+    }
+
+    function drawEntity(entity) {
+
+        display.drawRect(
+            entity.x - 2,
+            entity.y - 2,
+            4,
+            4,
+            entity.color
+        )
+
+    }
+
+    function drawEntities(p_entities) {
+
+        var entity;
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            drawEntity(entity);
+
+        }
+
+    }
+
+    function updateDisplay() {
+
+        // drawBackground();
+
+        display.drawRect(0, 0, 800, 600, "rgba(15,15,15,0.1");
+
+        drawEntities(entities);
+
+    }
+
+    function tic() {
+
+        updateValues();
+
+        updateDisplay();
+
+        if (animating)
+
+        window.requestAnimationFrame(tic);
+
+    }
+
+    function start() {
+
+        animating = true;
+
+        tic();
+
+    }
+
+    function stop() {
+
+        animating = false;
+
+    }
+
+///////////
+// Execution
+
+    load();
+
+</script></body></html>

@@ -36,21 +36,16 @@
 
     }
 
-    function positionEntities() {
+    function positionEntityRandomly(entity) {
 
-        var entity;
+        entity.x = generateRandomNumber(0, WIDTH);
+        entity.y = generateRandomNumber(0, HEIGHT);
 
-        var i = 0;
-        var n = entities.length;
+    }
 
-        for ( i; i < n; i += 1 ) {
+    function positionEntities(p_entities) {
 
-            entity = entities[i];
-
-            entity.x = generateRandomNumber(0, WIDTH);
-            entity.y = generateRandomNumber(0, HEIGHT);
-
-        }
+        p_entities.map(positionEntityRandomly);
 
     }
 
@@ -58,7 +53,7 @@
 
         createDisplay();
         createEntities(10);
-        positionEntities();
+        positionEntities(entities);
 
     }
 
@@ -88,20 +83,9 @@
 
     }
 
-    function updateEntities(p_entities) {
+    function moveEntities(p_entities) {
 
-        var entity;
-
-        var i = 0;
-        var n = p_entities.length;
-
-        for ( i; i < n; i += 1 ) {
-
-            entity = p_entities[i];
-
-            moveEntity(entity);
-
-        }
+        p_entities.map(moveEntity);
 
     }
 
@@ -117,44 +101,39 @@
 
     }
 
-    function updateEntitiesDamage(p_entities) {
+    function checkForDeath(entity) {
 
-        var entity;
+        if (isOutOfBounds(entity)) {
 
-        var i = 0;
-        var n = p_entities.length;
-
-        for ( i; i < n; i += 1 ) {
-
-            entity = p_entities[i];
-
-            if (isOutOfBounds(entity)) {
-                kill(entity);
-            }
+            kill(entity);
 
         }
+
+    }
+
+    function updateEntities(p_entities) {
+
+        p_entities.map(checkForDeath)
 
     }
 
     function getAliveEntities(p_entities) {
 
         var entities;
-        var entity;
 
-        var entities = [];
-
-        var i = 0;
-        var n = p_entities.length;
-
-        for ( i; i < n; i += 1 ) {
-
-            entity = p_entities[i];
+        function addLivingEntity(entity) {
 
             if (entity.status !== 0) {
+
                 entities.push(entity);
+
             }
 
         }
+
+        entities = [];
+
+        p_entities.map(addLivingEntity);
 
         return entities;
 
@@ -162,9 +141,9 @@
 
     function updateValues() {
 
-        updateEntities(entities);
+        moveEntities(entities);
 
-        updateEntitiesDamage(entities);
+        updateEntities(entities);
 
         entities = getAliveEntities(entities);
 
@@ -192,25 +171,13 @@
 
     function drawEntities(p_entities) {
 
-        var entity;
-
-        var i = 0;
-        var n = p_entities.length;
-
-        for ( i; i < n; i += 1 ) {
-
-            entity = p_entities[i];
-
-            drawEntity(entity);
-
-        }
+        p_entities.map(drawEntity);
 
     }
 
     function updateDisplay() {
 
         drawBackground();
-
         drawEntities(entities);
 
     }

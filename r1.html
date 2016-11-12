@@ -204,7 +204,7 @@
 
         updateDisplay();
 
-        if (animating) {
+        if (animating === true) {
 
             window.requestAnimationFrame(tic);
 
@@ -213,6 +213,12 @@
     }
 
     function start() {
+
+        if (animating === true) {
+
+            return;
+
+        }
 
         animating = true;
 

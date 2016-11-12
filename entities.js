@@ -17,6 +17,8 @@ function createEntity() {
 
     entity.x = 0;
     entity.y = 0;
+    entity.width = 10;
+    entity.height = 10;
 
     entity.color = getRandomColor();
 

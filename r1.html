@@ -160,10 +160,10 @@
     function drawEntity(entity) {
 
         display.drawRect(
-            entity.x - 2,
-            entity.y - 2,
-            4,
-            4,
+            entity.x - (entity.width / 2),
+            entity.y - (entity.height / 2),
+            entity.width,
+            entity.height,
             entity.color
         )
 

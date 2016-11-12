@@ -1,15 +1,9 @@
 function getRandomColor() {
 
-    var colors;
-    var index;
-    var color;
-
-    colors = [
-        "white",    "gray",     "black",    "red",  "orange",
-        "yellow",   "green",    "cyan",     "blue", "purple"
-    ];
-    index = generateRandomNumber(0, colors.length);
-    color = colors[index];
+    var red = generateRandomNumber(0, 255);
+    var green = generateRandomNumber(0, 255);
+    var blue = generateRandomNumber(0, 255);
+    var color = "rgba(" + red + "," + green + "," + blue + ",1)";
 
     return color;
 

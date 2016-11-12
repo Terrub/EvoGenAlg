@@ -21,8 +21,8 @@ function createEntity() {
 
     entity = {};
 
-    entity.x = generateRandomNumber(0, 800);
-    entity.y = generateRandomNumber(0, 600);
+    entity.x = 0;
+    entity.y = 0;
 
     entity.color = getRandomColor();
 

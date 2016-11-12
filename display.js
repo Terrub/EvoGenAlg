@@ -1,12 +1,12 @@
-function getDisplay() {
+function getDisplay(p_width, p_height) {
 
     var display;
     var canvas;
     var glib;
 
     canvas = document.createElement("canvas");
-    canvas.width = 800;
-    canvas.height = 600;
+    canvas.width = p_width;
+    canvas.height = p_height;
 
     document.body.appendChild(canvas);
 

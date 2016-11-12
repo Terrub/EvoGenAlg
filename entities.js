@@ -2,12 +2,13 @@ function getRandomColor() {
 
     var colors;
     var index;
+    var color;
 
     colors = [
         "white",    "gray",     "black",    "red",  "orange",
         "yellow",   "green",    "cyan",     "blue", "purple"
     ];
-    index = generateRandomNumber(0,colors.length);
+    index = generateRandomNumber(0, colors.length);
     color = colors[index];
 
     return color;
@@ -36,11 +37,10 @@ function createEntity() {
 function getEntities(amount) {
 
     var entities;
-
-    entities = [];
-
     var i = 0;
     var n = amount;
+
+    entities = [];
 
     for ( i; i < n; i += 1 ) {
 

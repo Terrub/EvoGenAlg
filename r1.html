@@ -66,20 +66,12 @@
 
     function getRandomDirection() {
 
-        var directions;
-        var index;
+        var heading;
         var direction;
 
-        directions = [
-            {x:-1, y:-1},
-            {x: 1, y:-1},
-            {x:-1, y: 1},
-            {x: 1, y: 1},
-        ];
+        heading = Math.random() * (Math.PI * 2);
 
-        index = generateRandomNumber(0, 4);
-
-        direction = directions[index];
+        direction = {x: Math.cos(heading), y: Math.sin(heading)};
 
         return direction;
 

@@ -33,7 +33,6 @@ function createEntity() {
 function getEntities(amount) {
 
     var entities;
-    var entity;
     var i = 0;
     var n = amount;
 
@@ -41,11 +40,7 @@ function getEntities(amount) {
 
     for ( i; i < n; i += 1 ) {
 
-        entity = createEntity();
-
-        entity.id = i;
-
-        entities[i] = entity
+        entities[i] = createEntity();
 
     }
 

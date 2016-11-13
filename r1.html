@@ -6,6 +6,7 @@
     <script src="utils.js"></script>
     <script src="display.js"></script>
     <script src="entities.js"></script>
+    <script src="grid.js"></script>
 
 </head><body>
 <div>
@@ -116,6 +117,86 @@
 
     }
 
+    function killTouchingEntities(p_entities) {
+
+        var grid;
+
+        var i;
+        var n;
+        var entity;
+
+        var x;
+        var w;
+        var y;
+        var h;
+
+        var row;
+        var col;
+
+        grid = Grid.create(WIDTH, HEIGHT);
+
+        i = 0;
+        n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            x = Math.max(0, Math.ceil(entity.x - (entity.width / 2)));
+            w = Math.min(WIDTH, Math.ceil(x + entity.width));
+
+            for (x; x < w; x += 1) {
+
+                y = Math.max(0, Math.ceil(entity.y - (entity.height / 2)));
+                h = Math.min(HEIGHT, Math.ceil(y + entity.height));
+
+                for (y; y < h; y += 1) {
+
+                    Grid.addOccupant(grid, x, y, i);
+
+                }
+
+            }
+
+        }
+
+        row = 0;
+
+        for (row; row < WIDTH; row += 1) {
+
+            col = 0;
+
+            for (col; col < HEIGHT; col += 1) {
+
+                if ( Grid.isOccupied(grid, row, col)) {
+
+                    occupants = Grid.getOccupants(grid, row, col);
+
+                    occupant_ids = Object.keys(occupants);
+
+                    if (occupant_ids.length > 1) {
+
+                        i = 0;
+                        n = occupant_ids.length;
+
+                        for (i; i < n; i += 1) {
+
+                            id = occupant_ids[i];
+
+                            kill(p_entities[id]);
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
     function checkForDeath(entity) {
 
         if (isOutOfBounds(entity)) {
@@ -127,6 +208,8 @@
     }
 
     function updateEntities(p_entities) {
+
+        killTouchingEntities(p_entities);
 
         p_entities.map(checkForDeath);
 

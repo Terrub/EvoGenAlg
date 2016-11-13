@@ -35,6 +35,7 @@
 
     var WIDTH = 800;
     var HEIGHT = 600;
+    var NUM_ENTITIES = 100;
 
     var display;
     var entities;
@@ -68,7 +69,7 @@
     function load() {
 
         createDisplay();
-        createEntities(10);
+        createEntities(NUM_ENTITIES);
         positionEntities(entities);
 
     }

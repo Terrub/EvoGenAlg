@@ -128,11 +128,11 @@
 
     function updateEntities(p_entities) {
 
-        p_entities.map(checkForDeath)
+        p_entities.map(checkForDeath);
 
     }
 
-    function getAliveEntities(p_entities) {
+    function getLivingEntities(p_entities) {
 
         var entities;
 
@@ -157,10 +157,8 @@
     function updateValues() {
 
         moveEntities(entities);
-
         updateEntities(entities);
-
-        entities = getAliveEntities(entities);
+        entities = getLivingEntities(entities);
 
     }
 

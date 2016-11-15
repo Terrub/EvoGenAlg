@@ -171,6 +171,7 @@
         var ceil = Math.ceil;
         var width = WIDTH;
         var height = HEIGHT;
+        var half_size;
 
         var i = 0;
         var n = p_entities.length;
@@ -179,13 +180,14 @@
 
             entity = p_entities[i];
 
-            x = max(0, ceil(entity.x - (entity.width / 2)));
-            w = min(width, ceil(x + entity.width));
+            half_size = (entity.size / 2);
+            x = max(0, ceil(entity.x - half_size));
+            w = min(width, ceil(x + entity.size));
 
             for (x; x < w; x += 1) {
 
-                y = max(0, ceil(entity.y - (entity.height / 2)));
-                h = min(height, ceil(y + entity.height));
+                y = max(0, ceil(entity.y - half_size));
+                h = min(height, ceil(y + entity.size));
 
                 for (y; y < h; y += 1) {
 
@@ -218,8 +220,7 @@
 
             str = p_left_entity.strength;
             spd = p_left_entity.speed;
-            // Well this is FUGLY
-            size = p_left_entity.width;
+            size = p_left_entity.size;
 
             // For now average the lot...
             left = (str + spd + size) / 3;
@@ -230,7 +231,7 @@
 
             str = p_right_entity.strength;
             spd = p_right_entity.speed;
-            size = p_right_entity.width;
+            size = p_right_entity.size;
 
             right = (str + spd + size) / 3;
 
@@ -364,11 +365,13 @@
     // to entity class itself? Resolution is fixed due to units anyway.
     function drawEntity(entity) {
 
+        var half_size = (entity.size / 2);
+
         display.drawRect(
-            entity.x - (entity.width / 2),
-            entity.y - (entity.height / 2),
-            entity.width,
-            entity.height,
+            entity.x - half_size,
+            entity.y - half_size,
+            entity.size,
+            entity.size,
             entity.color
         )
 

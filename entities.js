@@ -1,27 +1,34 @@
+//#REFACTOR this into a separate class already!!! DX
 var TRAITS = {
     "SPEED": {
         "index": 0,
-        "range": 100
+        "range": 100,
+        "offset": 0
     },
     "STRENGTH": {
         "index": 1,
-        "range": 100
+        "range": 100,
+        "offset": 0
     },
     "SIZE": {
         "index": 2,
-        "range": 20
+        "range": 20,
+        "offset": 1
     },
     "RED": {
         "target": "STRENGTH",
-        "range": 256
+        "range": 256,
+        "offset": 0
     },
     "GREEN": {
         "target": "SPEED",
-        "range": 256
+        "range": 256,
+        "offset": 0
     },
     "BLUE": {
         "target": "SIZE",
-        "range": 256
+        "range": 256,
+        "offset": 0
     }
 }
 
@@ -65,7 +72,7 @@ function getTraitFromGenome(p_genome, p_trait) {
 
     value = sequence[trait.index];
 
-    return (value * p_trait.range) | 0;
+    return (value * p_trait.range) + p_trait.offset | 0;
 
 }
 
@@ -111,21 +118,16 @@ function createEntity() {
 
     entity = {};
 
-    entity.genome = generateRandomGenome();
-
     entity.x = 0;
     entity.y = 0;
+    entity.status = 1;
 
-    size = getEntitySize(entity) + 1;
+    entity.genome = generateRandomGenome();
 
-    entity.width = size;
-    entity.height = size;
-
+    entity.size = getEntitySize(entity);
     entity.color = getEntityColor(entity);
     entity.speed = getEntitySpeed(entity);
     entity.strength = getEntityStrength(entity);
-
-    entity.status = 1;
 
     return entity;
 
@@ -152,6 +154,7 @@ function getEntities(amount) {
 (function runTests() {
 
     var entity = createEntity();
+
     console.assert(
         isObject(entity.genome),
         "Entity has a genome.");
@@ -169,24 +172,20 @@ function getEntities(amount) {
         "Entity starts at y:0.");
 
     console.assert(
-        isInteger(entity.width) && entity.width > 0,
-        "Entity has a width greater than 0.");
-
-    console.assert(
-        isInteger(entity.height) && entity.height > 0,
-        "Entity has a height greater than 0.");
-
-    console.assert(
         isString(entity.color) && entity.color.length > 0,
         "Entity has a color string.");
 
     console.assert(
         isInteger(entity.speed) && entity.speed >= 0 && entity.speed < 100,
-        "Entity has a speed between 0 and 100.");
+        "Entity has a speed between 0 (incl) and 100 (exl.)");
 
     console.assert(
         isInteger(entity.strength) && entity.strength >= 0 && entity.strength < 100,
-        "Entity has a strength between 0 and 100.");
+        "Entity has a strength between 0 (incl) and 100 (exl.)");
+
+    console.assert(
+        isInteger(entity.size) && entity.size > 0 && entity.size <= 20,
+        "Entity has a size between 1 (incl) and 20 (incl.)");
 
     console.assert(
         entity.status === 1,

@@ -1,10 +1,28 @@
 var TRAITS = {
-    "RED":      {"index": 0,    "range": 256},
-    "GREEN":    {"index": 1,    "range": 256},
-    "BLUE":     {"index": 2,    "range": 256},
-    "SPEED":    {"index": 3,    "range": 100},
-    "STRENGTH": {"index": 4,    "range": 100},
-    "SIZE":     {"index": 5,    "range": 20}
+    "SPEED": {
+        "index": 0,
+        "range": 100
+    },
+    "STRENGTH": {
+        "index": 1,
+        "range": 100
+    },
+    "SIZE": {
+        "index": 2,
+        "range": 20
+    },
+    "RED": {
+        "target": "STRENGTH",
+        "range": 256
+    },
+    "GREEN": {
+        "target": "SPEED",
+        "range": 256
+    },
+    "BLUE": {
+        "target": "SIZE",
+        "range": 256
+    }
 }
 
 function generateRandomGenome() {
@@ -20,7 +38,11 @@ function generateRandomGenome() {
 
         trait = TRAITS[trait_name];
 
-        genome.sequence[trait.index] = Math.random();
+        if (!isUndefined(trait.index)) {
+
+            genome.sequence[trait.index] = Math.random();
+
+        }
 
     }
 
@@ -30,9 +52,18 @@ function generateRandomGenome() {
 
 function getTraitFromGenome(p_genome, p_trait) {
 
-    var sequence = p_genome.sequence;
+    var value;
 
-    var value = sequence[p_trait.index]
+    var sequence = p_genome.sequence;
+    var trait = p_trait;
+
+    if (!isUndefined(p_trait.target)) {
+
+        trait = TRAITS[p_trait.target];
+
+    }
+
+    value = sequence[trait.index];
 
     return (value * p_trait.range) | 0;
 
@@ -48,9 +79,9 @@ function getEntitySize(p_entity) {
 
 function getEntityColor(p_entity) {
 
-    var red = getTraitFromGenome(p_entity.genome, TRAITS.STRENGTH);
-    var green = getTraitFromGenome(p_entity.genome, TRAITS.SPEED);
-    var blue = getTraitFromGenome(p_entity.genome, TRAITS.SIZE);
+    var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
+    var green = getTraitFromGenome(p_entity.genome, TRAITS.GREEN);
+    var blue = getTraitFromGenome(p_entity.genome, TRAITS.BLUE);
     var color = "rgba(" + red + "," + green + "," + blue + ",1)";
 
     return color;

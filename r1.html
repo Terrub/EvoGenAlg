@@ -227,7 +227,7 @@
     }
 
     //#REFACTOR: too many indents. we can clean this up I'm sure!
-    function killTouchingEntities(p_entities, p_grid) {
+    function resolveTouchingEntities(p_entities, p_grid) {
 
         var row;
         var col;
@@ -315,7 +315,7 @@
 
     function updateEntities(p_entities) {
 
-        killTouchingEntities(p_entities, grid);
+        resolveTouchingEntities(p_entities, grid);
 
         p_entities.map(checkForDeath);
 

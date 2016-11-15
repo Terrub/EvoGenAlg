@@ -1,4 +1,3 @@
-
 var TRAITS = {
     "RED":      {"index": 0,    "range": 256},
     "GREEN":    {"index": 1,    "range": 256},
@@ -60,6 +59,8 @@ function getEntitySpeed(p_entity) {
 function getEntityStrength(p_entity) {
 
     var strength = getTraitFromGenome(p_entity.genome, TRAITS.STRENGTH);
+
+    return strength;
 
 }
 

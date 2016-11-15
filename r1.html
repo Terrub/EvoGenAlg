@@ -39,6 +39,7 @@
 
     var display;
     var entities;
+    var grid;
     var animating;
 
     function createDisplay() {
@@ -50,6 +51,12 @@
     function createEntities(amount) {
 
         entities = getEntities(amount);
+
+    }
+
+    function createGrid() {
+
+        grid = Grid.create(WIDTH, HEIGHT);
 
     }
 
@@ -70,6 +77,7 @@
 
         createDisplay();
         createEntities(NUM_ENTITIES);
+        createGrid();
         positionEntities(entities);
 
     }
@@ -159,16 +167,16 @@
 
     }
 
-    function killTouchingEntities(p_entities) {
+    function killTouchingEntities(p_entities, p_grid) {
 
         var row;
         var col;
         var i;
         var n;
 
-        var grid = Grid.create(WIDTH, HEIGHT);
+        Grid.reset(p_grid);
 
-        addEntitiesToGrid(p_entities, grid);
+        addEntitiesToGrid(p_entities, p_grid);
 
         row = 0;
 
@@ -219,7 +227,7 @@
 
     function updateEntities(p_entities) {
 
-        killTouchingEntities(p_entities);
+        killTouchingEntities(p_entities, grid);
 
         p_entities.map(checkForDeath);
 

@@ -97,12 +97,47 @@ var Grid = (function define_grid() {
 
     }
 
+    function resetRow(p_row) {
+
+        var cell;
+
+        var i = 0;
+        var n = p_row.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            cell = p_row[i];
+
+            resetCell(cell);
+
+        }
+
+    }
+
+    function resetGrid(p_grid) {
+
+        var row;
+
+        var i = 0;
+        var n = p_grid.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            row = p_grid[i];
+
+            resetRow(row);
+
+        }
+
+    }
+
     proto_grid = {
         "create": createNewGrid,
         "addOccupant": addOccupant,
         "getOccupants": getOccupants,
         "isOccupied": isOccupied,
-        "vacate": vacate
+        "vacate": vacate,
+        "reset": resetGrid
     };
 
     return proto_grid;

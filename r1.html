@@ -205,24 +205,38 @@
 
     }
 
-    function sortEntityOnStrength(p_left_entity, p_right_entity) {
+    function sortEntitiesOnFitness(p_left_entity, p_right_entity) {
+
+        var str;
+        var spd;
+        var size;
 
         var left = -1;
         var right = -1;
 
         if (p_left_entity.status !== 0) {
 
-            left = p_left_entity.strength;
+            str = p_left_entity.strength;
+            spd = p_left_entity.speed;
+            // Well this is FUGLY
+            size = p_left_entity.width;
+
+            // For now average the lot...
+            left = (str + spd + size) / 3;
 
         }
 
         if (p_right_entity.status !== 0) {
 
-            right = p_right_entity.strength;
+            str = p_right_entity.strength;
+            spd = p_right_entity.speed;
+            size = p_right_entity.width;
+
+            right = (str + spd + size) / 3;
 
         }
 
-        return p_left_entity.strength - p_right_entity.strength;
+        return left - right;
 
     }
 
@@ -267,7 +281,7 @@
                         }
 
                         // Sort on strength Ascending.
-                        entities.sort(sortEntityOnStrength);
+                        entities.sort(sortEntitiesOnFitness);
 
                         // Kill all but the last and strongest entity occupying
                         // this grid location.

@@ -108,21 +108,31 @@
 
     }
 
+    function getLivingEntities(p_entities) {
+
+        var entities;
+
+        function addLivingEntity(entity) {
+
+            if (entity.status !== 0) {
+
+                entities.push(entity);
+
+            }
+
+        }
+
+        entities = [];
+
+        p_entities.map(addLivingEntity);
+
+        return entities;
+
+    }
+
     function moveEntities(p_entities) {
 
         p_entities.map(moveEntity);
-
-    }
-
-    function isOutOfBounds(entity) {
-
-        return ( entity.x < 0 || entity.x > WIDTH || entity.y < 0 || entity.y > HEIGHT );
-
-    }
-
-    function kill(entity) {
-
-        entity.status = 0;
 
     }
 
@@ -167,20 +177,28 @@
 
     }
 
+    function kill(entity) {
+
+        entity.status = 0;
+
+    }
+
     function killTouchingEntities(p_entities, p_grid) {
 
         var row;
         var col;
         var i;
         var n;
+        var w = WIDTH;
+        var h = HEIGHT;
 
         row = 0;
 
-        for (row; row < WIDTH; row += 1) {
+        for (row; row < w; row += 1) {
 
             col = 0;
 
-            for (col; col < HEIGHT; col += 1) {
+            for (col; col < h; col += 1) {
 
                 if ( Grid.isOccupied(grid, row, col)) {
 
@@ -228,29 +246,7 @@
         p_entities.map(checkForDeath);
 
     }
-
-    function getLivingEntities(p_entities) {
-
-        var entities;
-
-        function addLivingEntity(entity) {
-
-            if (entity.status !== 0) {
-
-                entities.push(entity);
-
-            }
-
-        }
-
-        entities = [];
-
-        p_entities.map(addLivingEntity);
-
-        return entities;
-
-    }
-
+// ----
     function updateValues() {
 
         entities = getLivingEntities(entities);
@@ -294,6 +290,7 @@
     function updateDisplay() {
 
         drawBackground();
+
         drawEntities(entities);
 
     }

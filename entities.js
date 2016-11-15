@@ -29,14 +29,19 @@ function generateEntityColor(p_entity) {
 function generateRandomGenome() {
 
     var genome;
+    var trait;
 
     genome = {
         "sequence": []
     };
 
-    genome.sequence[TRAITS.RED.index] = Math.random();
-    genome.sequence[TRAITS.GREEN.index] = Math.random();
-    genome.sequence[TRAITS.BLUE.index] = Math.random();
+    for (trait_name in TRAITS) {
+
+        trait = TRAITS[trait_name];
+
+        genome.sequence[trait.index] = Math.random();
+
+    }
 
     return genome;
 

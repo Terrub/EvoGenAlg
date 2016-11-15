@@ -3,7 +3,8 @@ var TRAITS = {
     "GREEN":    {"index": 1,    "range": 256},
     "BLUE":     {"index": 2,    "range": 256},
     "SPEED":    {"index": 3,    "range": 100},
-    "STRENGTH": {"index": 4,    "range": 100}
+    "STRENGTH": {"index": 4,    "range": 100},
+    "SIZE":     {"index": 5,    "range": 20}
 }
 
 function generateRandomGenome() {
@@ -37,6 +38,14 @@ function getTraitFromGenome(p_genome, p_trait) {
 
 }
 
+function getEntitySize(p_entity) {
+
+    var size = getTraitFromGenome(p_entity.genome, TRAITS.SIZE);
+
+    return size;
+
+}
+
 function getEntityColor(p_entity) {
 
     var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
@@ -67,6 +76,7 @@ function getEntityStrength(p_entity) {
 function createEntity() {
 
     var entity;
+    var size;
 
     entity = {};
 
@@ -74,8 +84,11 @@ function createEntity() {
 
     entity.x = 0;
     entity.y = 0;
-    entity.width = 10;
-    entity.height = 10;
+
+    size = getEntitySize(entity) + 1;
+
+    entity.width = size;
+    entity.height = size;
 
     entity.color = getEntityColor(entity);
     entity.speed = getEntitySpeed(entity);
@@ -147,6 +160,5 @@ function getEntities(amount) {
     console.assert(
         entity.status === 1,
         "Entity is alive.");
-
 
 }())

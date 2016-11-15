@@ -4,6 +4,7 @@ var TRAITS = {
     "GREEN":    {"index": 1,    "range": 256},
     "BLUE":     {"index": 2,    "range": 256},
     "SPEED":    {"index": 3,    "range": 100},
+    "STRENGTH": {"index": 4,    "range": 100}
 }
 
 function generateRandomGenome() {
@@ -56,6 +57,12 @@ function getEntitySpeed(p_entity) {
 
 }
 
+function getEntityStrength(p_entity) {
+
+    var strength = getTraitFromGenome(p_entity.genome, TRAITS.STRENGTH);
+
+}
+
 function createEntity() {
 
     var entity;
@@ -71,6 +78,7 @@ function createEntity() {
 
     entity.color = getEntityColor(entity);
     entity.speed = getEntitySpeed(entity);
+    entity.strength = getEntityStrength(entity);
 
     entity.status = 1;
 

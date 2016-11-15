@@ -1,11 +1,17 @@
 
+var TRAITS = {
+    "RED":      {"index": 0,    "range": 256},
+    "GREEN":    {"index": 1,    "range": 256},
+    "BLUE":     {"index": 2,    "range": 256},
+}
+
 function getRedFromGenome(p_entity) {
 
     var genome = p_entity.genome;
 
-    var red = genome.sequence[0];
+    var red = genome.sequence[TRAITS.RED.index];
 
-    return (red * 256) | 0;
+    return (red * TRAITS.RED.range) | 0;
 
 }
 
@@ -13,9 +19,9 @@ function getGreenFromGenome(p_entity) {
 
     var genome = p_entity.genome;
 
-    var green = genome.sequence[1];
+    var green = genome.sequence[TRAITS.GREEN.index];
 
-    return (green * 256) | 0;
+    return (green * TRAITS.GREEN.range) | 0;
 
 }
 
@@ -23,9 +29,9 @@ function getBlueFromGenome(p_entity) {
 
     var genome = p_entity.genome;
 
-    var blue = genome.sequence[2];
+    var blue = genome.sequence[TRAITS.BLUE.index];
 
-    return (blue * 256) | 0;
+    return (blue * TRAITS.BLUE.range) | 0;
 
 }
 
@@ -48,9 +54,9 @@ function generateRandomGenome() {
         "sequence": []
     };
 
-    genome.sequence[0] = Math.random();
-    genome.sequence[1] = Math.random();
-    genome.sequence[2] = Math.random();
+    genome.sequence[TRAITS.RED.index] = Math.random();
+    genome.sequence[TRAITS.GREEN.index] = Math.random();
+    genome.sequence[TRAITS.BLUE.index] = Math.random();
 
     return genome;
 

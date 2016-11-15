@@ -229,6 +229,17 @@
 
     }
 
+    function isOutOfBounds(entity) {
+
+        var left = (entity.x < 0);
+        var right = (entity.x > WIDTH);
+        var top = (entity.y < 0);
+        var bottom = (entity.y > HEIGHT);
+
+        return (left || right || top || bottom);
+
+    }
+
     function checkForDeath(entity) {
 
         if (isOutOfBounds(entity)) {

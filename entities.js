@@ -111,7 +111,106 @@ function getEntityStrength(p_entity) {
 
 }
 
-function createEntity() {
+function checkForLikableTrait(p_entity, p_target) {
+
+    var higher_str = p_entity.strength < p_target.strength + 10;
+    var higher_spd = p_entity.speed < p_target.speed + 10;
+    var bigger = p_entity.size < p_target.size + 10;
+
+    return (higher_spd || higher_str || bigger);
+
+}
+
+function calculateEntityFitness(p_entity) {
+
+    return (p_entity.size + p_entity.strength);
+
+}
+
+function canEntityMateTarget(p_entity, p_target) {
+
+    // For now... if the target cannot kill us... we can breed with it.
+    return !canEntityKillTarget(p_target, p_entity);
+
+}
+
+function generateRandomGenome() {
+
+    var genome;
+    var trait;
+
+    genome = {
+        "sequence": []
+    };
+
+    for (trait_name in TRAITS) {
+
+        trait = TRAITS[trait_name];
+
+        if (!isUndefined(trait.index)) {
+
+            genome.sequence[trait.index] = Math.random();
+
+        }
+
+    }
+
+    return genome;
+
+}
+
+// I FEEL DIRTY HAVING WRITTEN THIS!!!! OMG!!!!
+function mate(p_entity, p_target) {
+
+    var genome;
+    var trait_name;
+    var host;
+
+    genome = {
+        "sequence": []
+    };
+
+    for (trait_name in TRAITS) {
+
+        trait = TRAITS[trait_name];
+
+        if (!isUndefined(trait.index)) {
+
+            if (Math.round(Math.random()) === 1) {
+
+                host = p_entity;
+
+            } else {
+
+                host = p_target;
+
+            }
+
+            genome.sequence[trait.index] = host.genome.sequence[trait.index];
+
+        }
+
+    }
+
+    return createEntity(genome);
+
+}
+
+function canEntityKillTarget(p_entity, p_target) {
+
+    return calculateEntityFitness(p_entity) >= calculateEntityFitness(p_target);
+
+}
+
+
+function killEntity(p_entity) {
+
+    p_entity.status = 0;
+
+}
+
+
+function createEntity(p_genome) {
 
     var entity;
     var size;
@@ -122,7 +221,7 @@ function createEntity() {
     entity.y = 0;
     entity.status = 1;
 
-    entity.genome = generateRandomGenome();
+    entity.genome = p_genome;
 
     entity.size = getEntitySize(entity);
     entity.color = getEntityColor(entity);
@@ -138,12 +237,15 @@ function getEntities(amount) {
     var entities;
     var i = 0;
     var n = amount;
+    var genome;
 
     entities = [];
 
     for ( i; i < n; i += 1 ) {
 
-        entities[i] = createEntity();
+        genome = generateRandomGenome();
+
+        entities[i] = createEntity(genome);
 
     }
 
@@ -153,7 +255,8 @@ function getEntities(amount) {
 
 (function runTests() {
 
-    var entity = createEntity();
+    var genome = generateRandomGenome();
+    var entity = createEntity(genome);
 
     console.assert(
         isObject(entity.genome),

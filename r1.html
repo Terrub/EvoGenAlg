@@ -208,6 +208,28 @@
         var n;
         var w = WIDTH;
         var h = HEIGHT;
+        var entities;
+
+        function compareEntityStrength(p_left_entity, p_right_entity) {
+
+            var left = -1;
+            var right = -1;
+
+            if (p_left_entity.status !== 0) {
+
+                left = p_left_entity.strength;
+
+            }
+
+            if (p_right_entity.status !== 0) {
+
+                right = p_right_entity.strength;
+
+            }
+
+            return p_left_entity.strength - p_right_entity.strength;
+
+        }
 
         row = 0;
 
@@ -225,14 +247,32 @@
 
                     if (occupant_ids.length > 1) {
 
+                        entities = [];
+
                         i = 0;
                         n = occupant_ids.length;
 
                         for (i; i < n; i += 1) {
 
                             id = occupant_ids[i];
+                            entity = p_entities[id];
+                            entities.push(entity);
 
-                            kill(p_entities[id]);
+                        }
+
+                        // Sort on strength Ascending.
+                        entities.sort(compareEntityStrength);
+
+                        // Kill all but the last and strongest entity occupying
+                        // this grid location.
+                        i = 0;
+                        n = entities.length - 1;
+
+                        for (i; i < n; i += 1) {
+
+                            entity = entities[i];
+
+                            kill(entity);
 
                         }
 

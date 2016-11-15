@@ -48,9 +48,9 @@ function getEntitySize(p_entity) {
 
 function getEntityColor(p_entity) {
 
-    var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
-    var green = getTraitFromGenome(p_entity.genome, TRAITS.GREEN);
-    var blue = getTraitFromGenome(p_entity.genome, TRAITS.BLUE);
+    var red = getTraitFromGenome(p_entity.genome, TRAITS.STRENGTH);
+    var green = getTraitFromGenome(p_entity.genome, TRAITS.SPEED);
+    var blue = getTraitFromGenome(p_entity.genome, TRAITS.SIZE);
     var color = "rgba(" + red + "," + green + "," + blue + ",1)";
 
     return color;

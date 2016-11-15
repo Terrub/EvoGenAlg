@@ -118,48 +118,57 @@
 
     }
 
-    function killTouchingEntities(p_entities) {
+    function addEntitiesToGrid(p_entities, p_grid) {
 
-        var grid;
-
-        var i;
-        var n;
         var entity;
-
         var x;
         var w;
         var y;
         var h;
 
-        var row;
-        var col;
+        var max = Math.max;
+        var min = Math.min;
+        var ceil = Math.ceil;
+        var width = WIDTH;
+        var height = HEIGHT;
 
-        grid = Grid.create(WIDTH, HEIGHT);
-
-        i = 0;
-        n = p_entities.length;
+        var i = 0;
+        var n = p_entities.length;
 
         for ( i; i < n; i += 1 ) {
 
             entity = p_entities[i];
 
-            x = Math.max(0, Math.ceil(entity.x - (entity.width / 2)));
-            w = Math.min(WIDTH, Math.ceil(x + entity.width));
+            x = max(0, ceil(entity.x - (entity.width / 2)));
+            w = min(width, ceil(x + entity.width));
 
             for (x; x < w; x += 1) {
 
-                y = Math.max(0, Math.ceil(entity.y - (entity.height / 2)));
-                h = Math.min(HEIGHT, Math.ceil(y + entity.height));
+                y = max(0, ceil(entity.y - (entity.height / 2)));
+                h = min(height, ceil(y + entity.height));
 
                 for (y; y < h; y += 1) {
 
-                    Grid.addOccupant(grid, x, y, i);
+                    Grid.addOccupant(p_grid, x, y, i);
 
                 }
 
             }
 
         }
+
+    }
+
+    function killTouchingEntities(p_entities) {
+
+        var row;
+        var col;
+        var i;
+        var n;
+
+        var grid = Grid.create(WIDTH, HEIGHT);
+
+        addEntitiesToGrid(p_entities);
 
         row = 0;
 

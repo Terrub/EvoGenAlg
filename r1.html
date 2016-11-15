@@ -22,8 +22,20 @@
 
     -   I want entities to carry a genome of sorts so we can do the actual
         mutation and procreation.
+
+        >   Should be easily done if I generate genomes in the entity creation.
+            The real question is, how do I represent the genome?
+            Do I use a large string of letters similar to DNA or do I just make
+            an array with numbers or enumerables?
+
     -   I want the entities to interact with one another so that we can have
         a means to compare/contest the genomes between entities.
+
+        >   I've got collision detection of sorts now. I should look into
+            making colliding entities assess oneanother and then either do
+            something or not. Something could be attack/kill and or (attempt to)
+            breed?
+
     -   Eventually I want to have all the metrics that are active, to be
         represented in the genome. (I don't yet know how to determine which part
         of the genome is changable.)
@@ -60,6 +72,8 @@
 
     }
 
+    //#NOTE: Am I happy with this here? It's just the initial generation right?
+    // so it shouldn't matter if this is here?
     function positionEntityRandomly(entity) {
 
         entity.x = generateRandomNumber(0, WIDTH);
@@ -97,6 +111,7 @@
 
     }
 
+    //#REFACTOR: the randomised movement to use the genome!
     function moveEntity(entity) {
 
         var direction;
@@ -136,6 +151,7 @@
 
     }
 
+    //#REFACTOR: See drawEntity
     function addEntitiesToGrid(p_entities, p_grid) {
 
         var entity;
@@ -183,6 +199,7 @@
 
     }
 
+    //#REFACTOR: too many indents. we can clean this up I'm sure!
     function killTouchingEntities(p_entities, p_grid) {
 
         var row;
@@ -257,7 +274,9 @@
         p_entities.map(checkForDeath);
 
     }
+
 // ----
+
     function updateValues() {
 
         entities = getLivingEntities(entities);
@@ -280,6 +299,9 @@
 
     }
 
+    //#REFACTOR: How do I merge this with the logic in 'addEntitiesToGrid'
+    // I'm doing unit occupation calculations in two places. Perhaps move it
+    // to entity class itself? Resolution is fixed due to units anyway.
     function drawEntity(entity) {
 
         display.drawRect(

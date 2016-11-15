@@ -174,10 +174,6 @@
         var i;
         var n;
 
-        Grid.reset(p_grid);
-
-        addEntitiesToGrid(p_entities, p_grid);
-
         row = 0;
 
         for (row; row < WIDTH; row += 1) {
@@ -257,9 +253,15 @@
 
     function updateValues() {
 
-        moveEntities(entities);
-        updateEntities(entities);
         entities = getLivingEntities(entities);
+
+        moveEntities(entities);
+
+        Grid.reset(grid);
+
+        addEntitiesToGrid(entities, grid);
+
+        updateEntities(entities);
 
     }
 

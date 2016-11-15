@@ -5,41 +5,21 @@ var TRAITS = {
     "BLUE":     {"index": 2,    "range": 256},
 }
 
-function getRedFromGenome(p_entity) {
+function getTraitFromGenome(p_genome, p_trait) {
 
-    var genome = p_entity.genome;
+    var sequence = p_genome.sequence;
 
-    var red = genome.sequence[TRAITS.RED.index];
+    var value = sequence[p_trait.index]
 
-    return (red * TRAITS.RED.range) | 0;
-
-}
-
-function getGreenFromGenome(p_entity) {
-
-    var genome = p_entity.genome;
-
-    var green = genome.sequence[TRAITS.GREEN.index];
-
-    return (green * TRAITS.GREEN.range) | 0;
-
-}
-
-function getBlueFromGenome(p_entity) {
-
-    var genome = p_entity.genome;
-
-    var blue = genome.sequence[TRAITS.BLUE.index];
-
-    return (blue * TRAITS.BLUE.range) | 0;
+    return (value * p_trait.range) | 0;
 
 }
 
 function generateEntityColor(p_entity) {
 
-    var red = getRedFromGenome(p_entity);
-    var green = getGreenFromGenome(p_entity);
-    var blue = getBlueFromGenome(p_entity);
+    var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
+    var green = getTraitFromGenome(p_entity.genome, TRAITS.GREEN);
+    var blue = getTraitFromGenome(p_entity.genome, TRAITS.BLUE);
     var color = "rgba(" + red + "," + green + "," + blue + ",1)";
 
     return color;

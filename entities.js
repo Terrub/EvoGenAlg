@@ -3,27 +3,7 @@ var TRAITS = {
     "RED":      {"index": 0,    "range": 256},
     "GREEN":    {"index": 1,    "range": 256},
     "BLUE":     {"index": 2,    "range": 256},
-}
-
-function getTraitFromGenome(p_genome, p_trait) {
-
-    var sequence = p_genome.sequence;
-
-    var value = sequence[p_trait.index]
-
-    return (value * p_trait.range) | 0;
-
-}
-
-function generateEntityColor(p_entity) {
-
-    var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
-    var green = getTraitFromGenome(p_entity.genome, TRAITS.GREEN);
-    var blue = getTraitFromGenome(p_entity.genome, TRAITS.BLUE);
-    var color = "rgba(" + red + "," + green + "," + blue + ",1)";
-
-    return color;
-
+    "SPEED":    {"index": 3,    "range": 100},
 }
 
 function generateRandomGenome() {
@@ -47,6 +27,35 @@ function generateRandomGenome() {
 
 }
 
+function getTraitFromGenome(p_genome, p_trait) {
+
+    var sequence = p_genome.sequence;
+
+    var value = sequence[p_trait.index]
+
+    return (value * p_trait.range) | 0;
+
+}
+
+function getEntityColor(p_entity) {
+
+    var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
+    var green = getTraitFromGenome(p_entity.genome, TRAITS.GREEN);
+    var blue = getTraitFromGenome(p_entity.genome, TRAITS.BLUE);
+    var color = "rgba(" + red + "," + green + "," + blue + ",1)";
+
+    return color;
+
+}
+
+function getEntitySpeed(p_entity) {
+
+    var speed = getTraitFromGenome(p_entity.genome, TRAITS.SPEED);
+
+    return speed;
+
+}
+
 function createEntity() {
 
     var entity;
@@ -60,9 +69,8 @@ function createEntity() {
     entity.width = 10;
     entity.height = 10;
 
-    entity.color = generateEntityColor(entity);
-
-    entity.speed = generateRandomNumber(0, 10) * 0.2;
+    entity.color = getEntityColor(entity);
+    entity.speed = getEntitySpeed(entity);
 
     entity.status = 1;
 

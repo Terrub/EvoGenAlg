@@ -118,8 +118,8 @@
 
         direction = getRandomDirection();
 
-        entity.x += entity.speed * direction.x;
-        entity.y += entity.speed * direction.y;
+        entity.x += entity.speed * direction.x * 0.02;
+        entity.y += entity.speed * direction.y * 0.02;
 
     }
 

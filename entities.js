@@ -103,3 +103,49 @@ function getEntities(amount) {
     return entities;
 
 }
+
+(function runTests() {
+
+    var entity = createEntity();
+    console.assert(
+        isObject(entity.genome),
+        "Entity has a genome.");
+
+    console.assert(
+        !isUndefined(entity.genome.sequence),
+        "Entity genome has a defined sequene.");
+
+    console.assert(
+        entity.x === 0,
+        "Entity starts at x:0.");
+
+    console.assert(
+        entity.y === 0,
+        "Entity starts at y:0.");
+
+    console.assert(
+        isInteger(entity.width) && entity.width > 0,
+        "Entity has a width greater than 0.");
+
+    console.assert(
+        isInteger(entity.height) && entity.height > 0,
+        "Entity has a height greater than 0.");
+
+    console.assert(
+        isString(entity.color) && entity.color.length > 0,
+        "Entity has a color string.");
+
+    console.assert(
+        isInteger(entity.speed) && entity.speed >= 0 && entity.speed < 100,
+        "Entity has a speed between 0 and 100.");
+
+    console.assert(
+        isInteger(entity.strength) && entity.strength >= 0 && entity.strength < 100,
+        "Entity has a strength between 0 and 100.");
+
+    console.assert(
+        entity.status === 1,
+        "Entity is alive.");
+
+
+}())

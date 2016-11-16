@@ -113,9 +113,9 @@ function getEntityStrength(p_entity) {
 
 function checkForLikableTrait(p_entity, p_target) {
 
-    var higher_str = p_entity.strength < p_target.strength + 10;
-    var higher_spd = p_entity.speed < p_target.speed + 10;
-    var bigger = p_entity.size < p_target.size + 10;
+    var higher_str = p_entity.strength < p_target.strength;
+    var higher_spd = p_entity.speed < p_target.speed;
+    var bigger = p_entity.size < p_target.size;
 
     return (higher_spd || higher_str || bigger);
 

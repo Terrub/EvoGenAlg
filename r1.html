@@ -201,43 +201,9 @@
 
     }
 
-    function kill(p_entity) {
+    function sortEntitiesOnSpeed(p_left_entity, p_right_entity) {
 
-        p_entity.status = 0;
-
-    }
-
-    function sortEntitiesOnFitness(p_left_entity, p_right_entity) {
-
-        var str;
-        var spd;
-        var size;
-
-        var left = -1;
-        var right = -1;
-
-        if (p_left_entity.status !== 0) {
-
-            str = p_left_entity.strength;
-            spd = p_left_entity.speed;
-            size = p_left_entity.size;
-
-            // For now average the lot...
-            left = (str + spd + size) / 3;
-
-        }
-
-        if (p_right_entity.status !== 0) {
-
-            str = p_right_entity.strength;
-            spd = p_right_entity.speed;
-            size = p_right_entity.size;
-
-            right = (str + spd + size) / 3;
-
-        }
-
-        return left - right;
+        return p_right_entity.speed - p_left_entity.speed;
 
     }
 
@@ -248,9 +214,13 @@
         var col;
         var i;
         var n;
+        var entities;
+        var direction;
+
         var w = WIDTH;
         var h = HEIGHT;
-        var entities;
+
+        var new_children = [];
 
         row = 0;
 
@@ -281,19 +251,61 @@
 
                         }
 
-                        // Sort on strength Ascending.
-                        entities.sort(sortEntitiesOnFitness);
+                        // ORDER BY speed DESC;
+                        entities.sort(sortEntitiesOnSpeed);
 
-                        // Kill all but the last and strongest entity occupying
-                        // this grid location.
                         i = 0;
-                        n = entities.length - 1;
+                        n = entities.length;
 
                         for (i; i < n; i += 1) {
 
                             entity = entities[i];
 
-                            kill(entity);
+                            if (entity.status === 0) { continue; }
+
+                            j = 0;
+
+                            for (j; j < n; j += 1) {
+
+                                // Skip if targeting entity itself
+                                if (i === j) { continue; }
+
+                                target = entities[j];
+
+                                // Skip dead things
+                                if (target.status !== 1) { continue; }
+
+                                like = checkForLikableTrait(entity, target);
+
+                                if (like && new_children.length < 75) {
+
+                                    if (canEntityMateTarget(entity, target)) {
+
+                                        child = mate(entity, target);
+
+                                        child.x = (entity.x + target.x) / 2;
+                                        child.y = (entity.y + target.y) / 2;
+
+                                        direction = getRandomDirection();
+
+                                        child.x += (child.size * 1.5) * direction.x;
+                                        child.y += (child.size * 1.5) * direction.y;
+
+                                        new_children.push(child);
+
+                                    }
+
+                                } else {
+
+                                    if (canEntityKillTarget(entity, target)) {
+
+                                        killEntity(target);
+
+                                    }
+
+                                }
+
+                            }
 
                         }
 
@@ -304,6 +316,8 @@
             }
 
         }
+
+        return new_children;
 
     }
 
@@ -322,17 +336,9 @@
 
         if (isOutOfBounds(entity)) {
 
-            kill(entity);
+            killEntity(entity);
 
         }
-
-    }
-
-    function updateEntities(p_entities) {
-
-        resolveTouchingEntities(p_entities, grid);
-
-        p_entities.map(checkForDeath);
 
     }
 
@@ -340,15 +346,19 @@
 
     function updateValues() {
 
-        entities = getLivingEntities(entities);
-
         moveEntities(entities);
 
         Grid.reset(grid);
 
         addEntitiesToGrid(entities, grid);
 
-        updateEntities(entities);
+        new_children = resolveTouchingEntities(entities, grid);
+
+        entities = entities.concat(new_children);
+
+        entities.map(checkForDeath);
+
+        entities = getLivingEntities(entities);
 
     }
 
@@ -392,6 +402,14 @@
     }
 
     function tic() {
+
+        if (entities.length > 50000) {
+
+            stop();
+
+            console.log("Stopping. we're above our render limit!")
+
+        }
 
         updateValues();
 

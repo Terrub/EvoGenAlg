@@ -1,4 +1,6 @@
 //#REFACTOR this into a separate class already!!! DX
+// NOTE: While we're at it. I should probably discern traits from properties or
+//  attributes. The RGB values for instances are not traits but properties.
 var TRAITS = {
     "SPEED": {
         "index": 0,
@@ -111,6 +113,8 @@ function getEntityStrength(p_entity) {
 
 }
 
+// NOTE: I should add a trait that lowers or highers these numbers as a quick
+//  and temporary fix to jack up the diversity.
 function checkForLikableTrait(p_entity, p_target) {
 
     var higher_str = p_entity.strength < p_target.strength;

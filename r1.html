@@ -288,8 +288,8 @@
 
                                         direction = getRandomDirection();
 
-                                        child.x += Math.max(entity.size, target.size) + child.size * direction.x;
-                                        child.y += Math.max(entity.size, target.size) + child.size * direction.y;
+                                        child.x += (child.size * 1.5) * direction.x;
+                                        child.y += (child.size * 1.5) * direction.y;
 
                                         new_children.push(child);
 

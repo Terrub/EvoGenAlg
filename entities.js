@@ -123,7 +123,7 @@ function checkForLikableTrait(p_entity, p_target) {
 
 function calculateEntityFitness(p_entity) {
 
-    return (p_entity.size + p_entity.strength);
+    return (p_entity.size + p_entity.strength + p_entity.speed);
 
 }
 

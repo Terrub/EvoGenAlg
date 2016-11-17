@@ -124,8 +124,8 @@
 
         direction = getRandomDirection();
 
-        entity.x += entity.speed * direction.x * 0.02;
-        entity.y += entity.speed * direction.y * 0.02;
+        entity.x += entity.speed() * direction.x * 0.02;
+        entity.y += entity.speed() * direction.y * 0.02;
 
     }
 
@@ -180,14 +180,14 @@
 
             entity = p_entities[i];
 
-            half_size = (entity.size / 2);
+            half_size = (entity.size()/ 2);
             x = max(0, ceil(entity.x - half_size));
-            w = min(width, ceil(x + entity.size));
+            w = min(width, ceil(x + entity.size()));
 
             for (x; x < w; x += 1) {
 
                 y = max(0, ceil(entity.y - half_size));
-                h = min(height, ceil(y + entity.size));
+                h = min(height, ceil(y + entity.size()));
 
                 for (y; y < h; y += 1) {
 
@@ -203,7 +203,7 @@
 
     function sortEntitiesOnSpeed(p_left_entity, p_right_entity) {
 
-        return p_right_entity.speed - p_left_entity.speed;
+        return p_right_entity.speed() - p_left_entity.speed();
 
     }
 
@@ -288,8 +288,8 @@
 
                                         direction = getRandomDirection();
 
-                                        child.x += (child.size * 1.5) * direction.x;
-                                        child.y += (child.size * 1.5) * direction.y;
+                                        child.x += (child.size() * 1.5) * direction.x;
+                                        child.y += (child.size() * 1.5) * direction.y;
 
                                         new_children.push(child);
 
@@ -342,6 +342,38 @@
 
     }
 
+    //#TODO: Make entities mutation resistant using genome and use that to
+    //  determine whether or not the entity mutates or not.
+    //  We can add factors that influence the chance of mutations
+    //  happening later.
+    function mutateEntities(p_entities) {
+
+        var is_mutating;
+        var entity;
+
+        var i;
+        var n;
+
+        i = 0;
+        n = p_entities.length;
+
+        for (i; i < n; i += 1){
+
+            entity = p_entities[i];
+
+            // Mutate 20% of the time for now.
+            is_mutating = ((Math.random() + 0.2) > 1);
+
+            if (is_mutating) {
+
+                mutateEntity(entity);
+
+            }
+
+        }
+
+    }
+
 // ----
 
     function updateValues() {
@@ -360,6 +392,8 @@
 
         entities = getLivingEntities(entities);
 
+        mutateEntities(entities);
+
     }
 
 // ----
@@ -375,14 +409,14 @@
     // to entity class itself? Resolution is fixed due to units anyway.
     function drawEntity(entity) {
 
-        var half_size = (entity.size / 2);
+        var half_size = (entity.size() / 2);
 
         display.drawRect(
             entity.x - half_size,
             entity.y - half_size,
-            entity.size,
-            entity.size,
-            entity.color
+            entity.size(),
+            entity.size(),
+            entity.color()
         )
 
     }

@@ -38,6 +38,7 @@ function generateRandomGenome() {
 
     var genome;
     var trait;
+    var trait_name;
 
     genome = {
         "sequence": []
@@ -56,6 +57,38 @@ function generateRandomGenome() {
     }
 
     return genome;
+
+}
+
+function mutateEntity(p_entity) {
+
+    var trait;
+    var trait_name;
+    var mutation_offset;
+
+    for (trait_name in TRAITS) {
+
+        trait = TRAITS[trait_name];
+
+        if (!isUndefined(trait.index)) {
+
+            if (Math.round(Math.random()) === 1) {
+
+                mutation_offset = 0.01;
+
+            } else {
+
+                mutation_offset = -0.01;
+
+            }
+
+            new_trait = p_entity.genome.sequence[trait.index] + mutation_offset;
+
+            p_entity.genome.sequence[trait.index] = Math.min(1, new_trait);
+
+        }
+
+    }
 
 }
 
@@ -117,9 +150,9 @@ function getEntityStrength(p_entity) {
 //  and temporary fix to jack up the diversity.
 function checkForLikableTrait(p_entity, p_target) {
 
-    var higher_str = p_entity.strength < p_target.strength;
-    var higher_spd = p_entity.speed < p_target.speed;
-    var bigger = p_entity.size < p_target.size;
+    var higher_str = p_entity.strength() < p_target.strength();
+    var higher_spd = p_entity.speed() < p_target.speed();
+    var bigger = p_entity.size() < p_target.size();
 
     return (higher_spd || higher_str || bigger);
 
@@ -127,7 +160,7 @@ function checkForLikableTrait(p_entity, p_target) {
 
 function calculateEntityFitness(p_entity) {
 
-    return (p_entity.size + p_entity.strength + p_entity.speed);
+    return (p_entity.size() + p_entity.strength() + p_entity.speed()) / 3;
 
 }
 
@@ -135,31 +168,6 @@ function canEntityMateTarget(p_entity, p_target) {
 
     // For now... if the target cannot kill us... we can breed with it.
     return !canEntityKillTarget(p_target, p_entity);
-
-}
-
-function generateRandomGenome() {
-
-    var genome;
-    var trait;
-
-    genome = {
-        "sequence": []
-    };
-
-    for (trait_name in TRAITS) {
-
-        trait = TRAITS[trait_name];
-
-        if (!isUndefined(trait.index)) {
-
-            genome.sequence[trait.index] = Math.random();
-
-        }
-
-    }
-
-    return genome;
 
 }
 
@@ -227,10 +235,10 @@ function createEntity(p_genome) {
 
     entity.genome = p_genome;
 
-    entity.size = getEntitySize(entity);
-    entity.color = getEntityColor(entity);
-    entity.speed = getEntitySpeed(entity);
-    entity.strength = getEntityStrength(entity);
+    entity.size = () => { return getEntitySize(entity) };
+    entity.color = () => { return getEntityColor(entity) };
+    entity.speed = () => { return getEntitySpeed(entity) };
+    entity.strength = () => { return getEntityStrength(entity) };
 
     return entity;
 
@@ -279,19 +287,19 @@ function getEntities(amount) {
         "Entity starts at y:0.");
 
     console.assert(
-        isString(entity.color) && entity.color.length > 0,
+        isString(entity.color()) && entity.color().length > 0,
         "Entity has a color string.");
 
     console.assert(
-        isInteger(entity.speed) && entity.speed >= 0 && entity.speed < 100,
+        isInteger(entity.speed()) && entity.speed() >= 0 && entity.speed() < 100,
         "Entity has a speed between 0 (incl) and 100 (exl.)");
 
     console.assert(
-        isInteger(entity.strength) && entity.strength >= 0 && entity.strength < 100,
+        isInteger(entity.strength()) && entity.strength() >= 0 && entity.strength() < 100,
         "Entity has a strength between 0 (incl) and 100 (exl.)");
 
     console.assert(
-        isInteger(entity.size) && entity.size > 0 && entity.size <= 20,
+        isInteger(entity.size()) && entity.size() > 0 && entity.size() <= 20,
         "Entity has a size between 1 (incl) and 20 (incl.)");
 
     console.assert(

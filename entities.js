@@ -6,7 +6,7 @@
 var TRAITS = {
     "SPEED": {
         "index": 0,
-        "range": 2,
+        "range": 3,
         "offset": 0
     },
     "STRENGTH": {

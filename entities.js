@@ -274,40 +274,93 @@ function getEntities(amount) {
     var genome = generateRandomGenome();
     var entity = createEntity(genome);
 
-    console.assert(
-        isObject(entity.genome),
-        "Entity has a genome.");
+    // function (p_statement, p_assertion, p_expectation, p_experiment)
+    ropBotTestRunner(
+        "Entity has a genome object",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return isObject(entity.genome);
+        }
+    )
 
-    console.assert(
-        !isUndefined(entity.genome.sequence),
-        "Entity genome has a defined sequene.");
+    ropBotTestRunner(
+        "Entity genome has a sequence defined.",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return !isUndefined(entity.genome.sequence);
+        }
+    )
 
-    console.assert(
-        entity.x === 0,
-        "Entity starts at x:0.");
+    ropBotTestRunner(
+        "Entity starts at x = 0.",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        0,
+        () => {
+            return entity.x;
+        }
+    )
 
-    console.assert(
-        entity.y === 0,
-        "Entity starts at y:0.");
+    ropBotTestRunner(
+        "Entity starts at y = 0.",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        0,
+        () => {
+            return entity.y;
+        }
+    )
 
-    console.assert(
-        isString(entity.color()) && entity.color().length > 0,
-        "Entity has a color string.");
+    ropBotTestRunner(
+        "Entity has a color string.",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return (isString(entity.color())
+                && entity.color().length > 0);
+        }
+    )
 
-    console.assert(
-        isInteger(entity.speed()) && entity.speed() >= 0 && entity.speed() < 100,
-        "Entity has a speed between 0 (incl) and 100 (exl.)");
+    ropBotTestRunner(
+        "Entity has a speed between 0 (incl) and 3 (exl.)",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return (isInteger(entity.speed())
+                && entity.speed() >= 0
+                && entity.speed() < 3);
+        }
+    )
 
-    console.assert(
-        isInteger(entity.strength()) && entity.strength() >= 0 && entity.strength() < 100,
-        "Entity has a strength between 0 (incl) and 100 (exl.)");
+    ropBotTestRunner(
+        "Entity has a strength between 0 (incl) and 100 (exl.)",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return (isInteger(entity.strength())
+                && entity.strength() >= 0
+                && entity.strength() < 100);
+        }
+    )
 
-    console.assert(
-        isInteger(entity.size()) && entity.size() > 0 && entity.size() <= 20,
-        "Entity has a size between 1 (incl) and 20 (incl.)");
+    ropBotTestRunner(
+        "Entity has a size between 1 (incl) and 20 (incl.)",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return (isInteger(entity.size())
+                && entity.size() > 0
+                && entity.size() <= 20);
+        }
+    )
 
-    console.assert(
-        entity.status === 1,
-        "Entity is alive.");
+    ropBotTestRunner(
+        "Entity is alive.",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        1,
+        () => {
+            return entity.status;
+        }
+    )
 
 }())

@@ -84,7 +84,7 @@ function mutateEntity(p_entity) {
 
             new_trait = p_entity.genome.sequence[trait.index] + mutation_offset;
 
-            p_entity.genome.sequence[trait.index] = Math.min(1, new_trait);
+            p_entity.genome.sequence[trait.index] = Math.max(0, Math.min(1, new_trait));
 
         }
 

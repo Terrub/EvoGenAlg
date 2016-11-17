@@ -1,3 +1,5 @@
+"use strict";
+
 //#REFACTOR this into a separate class already!!! DX
 // NOTE: While we're at it. I should probably discern traits from properties or
 //  attributes. The RGB values for instances are not traits but properties.
@@ -266,6 +268,8 @@ function getEntities(amount) {
 }
 
 (function runTests() {
+
+    "use strict";
 
     var genome = generateRandomGenome();
     var entity = createEntity(genome);

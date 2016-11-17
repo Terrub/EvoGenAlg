@@ -1,4 +1,7 @@
+
 var Grid = (function define_grid() {
+
+    "use strict";
 
     var proto_grid;
 
@@ -41,6 +44,7 @@ var Grid = (function define_grid() {
         var grid;
         var i;
         var n;
+        var columns;
 
         grid = [];
 

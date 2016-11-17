@@ -1,3 +1,6 @@
+
+"use strict";
+
 function getDisplay(p_width, p_height) {
 
     var display;

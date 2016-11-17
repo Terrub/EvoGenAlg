@@ -1,6 +1,6 @@
-function isUndefined(value) {
+"use strict";
 
-    "use strict";
+function isUndefined(value) {
 
     // NOTE 1: value being a reference to something.
 
@@ -14,23 +14,17 @@ function isUndefined(value) {
 
 function isBoolean(value) {
 
-    "use strict";
-
     return ( typeof value === "boolean" );
 
 }
 
 function isNumber(num) {
 
-    "use strict";
-
     return ( typeof num === "number" );
 
 }
 
 function isInteger_old(value) {
-
-    "use strict";
 
     if (isString(value)) {
 
@@ -52,8 +46,6 @@ function isInteger(value) {
 
 function isString(value) {
 
-    "use strict";
-
     return ( typeof value === "string" );
 
 }
@@ -65,8 +57,6 @@ function isNull(value) {
 }
 
 function isObject(value) {
-
-    "use strict";
 
     //#NOTE1: typeof null === 'object' so check for null as well!
     if (isNull(value)) {
@@ -87,15 +77,11 @@ function isObject(value) {
 
 function isFunction(value) {
 
-    "use strict";
-
     return ( typeof value === "function" );
 
 }
 
 function isEmptyObject(value) {
-
-    "use strict";
 
     if (!isObject(value)) {
 
@@ -117,8 +103,6 @@ function isArray(value) {
 
 function faultOnError(err) {
 
-    "use strict";
-
     var errBody = document.createElement("body");
 
     errBody.style.backgroundColor = "#cc3333";
@@ -134,8 +118,6 @@ function faultOnError(err) {
 
 function attempt(toAttempt, args) {
 
-    "use strict";
-
     try {
 
         return toAttempt.apply(null, args);
@@ -150,8 +132,6 @@ function attempt(toAttempt, args) {
 
 function onlyProceedIf(statement, check) {
 
-    "use strict";
-
     if (attempt(check, [statement]) !== true) {
 
         reportError("A checkpoint failed, check the stack for more info.");
@@ -161,8 +141,6 @@ function onlyProceedIf(statement, check) {
 }
 
 function getTime() {
-
-    "use strict";
 
     return Date.now();
 
@@ -184,23 +162,17 @@ function generateRandomNumber( max, min ) {
 
 function report() {
 
-    "use strict";
-
     console.log.apply(console, arguments);
 
 }
 
 function reportError(error) {
 
-    "use strict";
-
     throw new Error(error);
 
 }
 
 function reportUsageError(error) {
-
-    "use strict";
 
     // For now just report the error normally;
     reportError(error);

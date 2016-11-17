@@ -67,6 +67,7 @@ function mutateEntity(p_entity) {
     var trait;
     var trait_name;
     var mutation_offset;
+    var new_trait;
 
     for (trait_name in TRAITS) {
 
@@ -177,6 +178,7 @@ function canEntityMateTarget(p_entity, p_target) {
 function mate(p_entity, p_target) {
 
     var genome;
+    var trait;
     var trait_name;
     var host;
 

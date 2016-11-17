@@ -59,6 +59,7 @@
 
     var display;
     var entities;
+    var new_children;
     var grid;
     var animating;
 
@@ -214,9 +215,20 @@
 
         var row;
         var col;
+
+        var occupants;
+        var occupant_ids;
+        var entities;
+        var id;
+        var entity;
+        var target;
+        var like;
+        var child;
+
         var i;
         var n;
-        var entities;
+        var j;
+
         var direction;
 
         var w = WIDTH;
@@ -231,6 +243,7 @@
             col = 0;
 
             for (col; col < h; col += 1) {
+
 
                 if ( Grid.isOccupied(grid, row, col)) {
 

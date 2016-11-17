@@ -180,14 +180,14 @@
 
             entity = p_entities[i];
 
-            half_size = (entity.size()/ 2);
-            x = max(0, ceil(entity.x - half_size));
-            w = min(width, ceil(x + entity.size()));
+            half_size = (entity.size() / 2);
+            x = max(0, ceil(entity.x - half_size)) | 0;
+            w = min(width, ceil(x + entity.size())) | 0;
 
             for (x; x < w; x += 1) {
 
-                y = max(0, ceil(entity.y - half_size));
-                h = min(height, ceil(y + entity.size()));
+                y = max(0, ceil(entity.y - half_size)) | 0;
+                h = min(height, ceil(y + entity.size())) | 0;
 
                 for (y; y < h; y += 1) {
 
@@ -412,10 +412,10 @@
         var half_size = (entity.size() / 2);
 
         display.drawRect(
-            entity.x - half_size,
-            entity.y - half_size,
-            entity.size(),
-            entity.size(),
+            (entity.x - half_size | 0),
+            (entity.y - half_size | 0),
+            (entity.size() | 0),
+            (entity.size() | 0),
             entity.color()
         )
 

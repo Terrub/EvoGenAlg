@@ -15,7 +15,9 @@ function getDisplay(p_width, p_height) {
 
     glib = canvas.getContext("2d");
 
-    display = {};
+    display = {
+        "canvas": canvas
+    };
 
     display.drawPixel = function(x, y, color) {
 

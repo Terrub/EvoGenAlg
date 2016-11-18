@@ -8,6 +8,13 @@
     <script src="entities.js"></script>
     <script src="grid.js"></script>
 
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
 </head><body>
 <div>
     <button onclick="start()">start</button>
@@ -53,8 +60,8 @@
 
     "use strict";
 
-    var WIDTH = window.innerWidth - 20;
-    var HEIGHT = window.innerHeight - 50;
+    var WIDTH = (window.innerWidth / 2);
+    var HEIGHT = (window.innerHeight / 2);
     var NUM_ENTITIES = 100;
 
     var display;
@@ -66,6 +73,9 @@
     function createDisplay() {
 
         display = getDisplay(WIDTH, HEIGHT);
+
+        display.canvas.style.width = (WIDTH * 2) + "px";
+        display.canvas.style.height = (HEIGHT * 2 - 25)  + "px";
 
     }
 

@@ -13,12 +13,36 @@
             margin: 0;
             padding: 0;
         }
+
+        button, input {
+            width: 5em;
+            height: 2em;
+            border-radius: 0.5em;
+            padding: 0.35em;
+            text-align: center;
+        }
+
+        input {
+            padding: 0;
+        }
+
+        input:invalid {
+          border: 1px solid red;
+        }
+
+        input:valid {
+          border: 1px solid green;
+        }
     </style>
 
 </head><body>
 <div>
     <button onclick="start()">start</button>
     <button onclick="stop()">stop</button>
+    <button onclick="document.location = document.location;">reset</button>
+    <label>
+        Entities: <input type="number" name="entity_count" value="100" min="0" pattern="^\d+$" />
+    </label>
 </div>
 <script>
 
@@ -62,7 +86,6 @@
 
     var WIDTH = (window.innerWidth / 2);
     var HEIGHT = (window.innerHeight / 2);
-    var NUM_ENTITIES = 100;
 
     var display;
     var entities;
@@ -76,12 +99,6 @@
 
         display.canvas.style.width = (WIDTH * 2) + "px";
         display.canvas.style.height = (HEIGHT * 2 - 25)  + "px";
-
-    }
-
-    function createEntities(amount) {
-
-        entities = getEntities(amount);
 
     }
 
@@ -100,18 +117,10 @@
 
     }
 
-    function positionEntities(p_entities) {
-
-        p_entities.map(positionEntityRandomly);
-
-    }
-
     function load() {
 
         createDisplay();
-        createEntities(NUM_ENTITIES);
         createGrid();
-        positionEntities(entities);
 
     }
 
@@ -483,6 +492,10 @@
     }
 
     function start() {
+        var amount = document.querySelector('[name="entity_count"]').value;
+
+        entities = getEntities(amount);
+        entities.map(positionEntityRandomly);
 
         if (animating === true) {
 

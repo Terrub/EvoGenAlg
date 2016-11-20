@@ -24,7 +24,7 @@ that can create and/or take 'life'.
 ## Working example:
 
 You should be able to see a working copy of the current status,
-here: Terrub.github.io/EvoGenAlg/
+here: https://Terrub.github.io/EvoGenAlg/
 
 ## Usage:
 Just go the working example and you may have to click a button of sorts that
@@ -35,9 +35,9 @@ That's it.
 You should see a canvas with a dark grey background that is dotted with squares
 in different colours and sizes that seems to move around pseudo-randomly.
 * The colour of a square is composed of the current value of a specific trait.
-** The red channel is represented by the trait: Strength.
-** The green channel is represented by the trait: Speed.
-** The blue channel is represented by the trait: Size.
+ * The red channel is represented by the trait: Strength.
+ * The green channel is represented by the trait: Speed.
+ * The blue channel is represented by the trait: Size.
 
 ### Traits:
 Each entity has a number of traits, these started of as just a few but will

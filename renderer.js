@@ -125,6 +125,40 @@ var Renderer = (function contructRenderer() {
 
     }
 
+    function updateEntityCounters(p_entities) {
+
+        var entity;
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            updateCounters(entity);
+
+        }
+
+    }
+
+    function resolveEntityActions(p_entities) {
+
+        var entity;
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            resolveActionAttempt(entity);
+
+        }
+
+    }
+
     function moveEntities(p_entities) {
 
         p_entities.map(moveEntity);
@@ -364,7 +398,11 @@ var Renderer = (function contructRenderer() {
 
     function updateValues() {
 
-        moveEntities(entities);
+        updateEntityCounters(entities);
+
+        resolveEntityActions(entities);
+
+        // moveEntities(entities);
 
         Grid.reset(grid);
 
@@ -398,8 +436,8 @@ var Renderer = (function contructRenderer() {
         var half_size = (entity.size() / 2);
 
         display.drawRect(
-            (entity.x - half_size | 0),
-            (entity.y - half_size | 0),
+            entity.x - half_size,
+            entity.y - half_size,
             (entity.size() | 0),
             (entity.size() | 0),
             entity.color()
@@ -515,6 +553,7 @@ var Renderer = (function contructRenderer() {
     proto_render.start = start;
     proto_render.stop = stop;
     proto_render.reset = reset;
+    proto_render.getRandomDirection = getRandomDirection;
 
     return proto_render;
 

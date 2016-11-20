@@ -6,8 +6,8 @@
 var TRAITS = {
     "SPEED": {
         "index": 0,
-        "range": 3,
-        "offset": 0
+        "range": 100,
+        "offset": 1
     },
     "STRENGTH": {
         "index": 1,
@@ -35,6 +35,8 @@ var TRAITS = {
         "offset": 0
     }
 }
+
+var ACTIONS_COSTS_MOVE = 300;
 
 function generateRandomGenome() {
 
@@ -218,6 +220,31 @@ function canEntityKillTarget(p_entity, p_target) {
 
 }
 
+function updateCounters(p_entity) {
+
+    var max = Math.max;
+    var proposed_cooldown = p_entity.cooldown_counter - p_entity.speed();
+
+    p_entity.cooldown_counter = max(0, proposed_cooldown);
+
+}
+
+function resolveActionAttempt(p_entity) {
+
+    var direction;
+
+    if (p_entity.cooldown_counter === 0) {
+
+        direction = Renderer.getRandomDirection();
+
+        p_entity.x += direction.x * 2;
+        p_entity.y += direction.y * 2;
+
+        p_entity.cooldown_counter = ACTIONS_COSTS_MOVE;
+
+    }
+
+}
 
 function killEntity(p_entity) {
 
@@ -236,6 +263,7 @@ function createEntity(p_genome) {
     entity.x = 0;
     entity.y = 0;
     entity.status = 1;
+    entity.cooldown_counter = 0;
 
     entity.genome = p_genome;
 
@@ -329,8 +357,8 @@ function getEntities(amount) {
         true,
         () => {
             return (isInteger(entity.speed())
-                && entity.speed() >= 0
-                && entity.speed() < 3);
+                && entity.speed() > 0
+                && entity.speed() <= 100);
         }
     )
 

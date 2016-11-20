@@ -443,10 +443,30 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function start() {
+    function loadWorld() {
 
         var amount;
         var entity_count;
+
+        entity_count = document.querySelector('[name="entity_count"]').value;
+
+        amount = parseInt(entity_count, 10);
+
+        if (!isInteger(amount) || amount < 2) {
+
+            reportUsageError("amount must be an integer > 1")
+
+        }
+
+        world_is_loaded = true;
+
+        entities = getEntities(amount);
+
+        entities.map(positionEntityRandomly);
+
+    }
+
+    function start() {
 
         if (animating === true) {
 
@@ -456,21 +476,7 @@ var Renderer = (function contructRenderer() {
 
         if (!world_is_loaded) {
 
-            entity_count = document.querySelector('[name="entity_count"]').value;
-
-            amount = parseInt(entity_count, 10);
-
-            if (!isInteger(amount) || amount < 2) {
-
-                reportUsageError("amount must be an integer > 1")
-
-            }
-
-            world_is_loaded = true;
-
-            entities = getEntities(amount);
-
-            entities.map(positionEntityRandomly);
+            loadWorld();
 
         }
 
@@ -497,7 +503,6 @@ var Renderer = (function contructRenderer() {
         entities = [];
 
         drawBackground();
-
     }
 
     ///////////
@@ -505,6 +510,7 @@ var Renderer = (function contructRenderer() {
 
     createDisplay();
     createGrid();
+    drawBackground();
 
     proto_render.start = start;
     proto_render.stop = stop;

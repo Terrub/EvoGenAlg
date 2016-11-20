@@ -274,8 +274,8 @@ var Renderer = (function contructRenderer() {
 
                                         direction = getRandomDirection();
 
-                                        child.x += (child.size() * 1.5) * direction.x;
-                                        child.y += (child.size() * 1.5) * direction.y;
+                                        child.x += (child.size() * Math.random() * 2 * direction.x);
+                                        child.y += (child.size() * Math.random() * 2 * direction.y);
 
                                         new_children.push(child);
 

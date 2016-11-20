@@ -49,6 +49,8 @@ var Renderer = (function contructRenderer() {
     var HEIGHT = (window.innerHeight / 2);
 
     var world_is_loaded = false;
+    var temp_time = getTime();
+    var tics = 0;
 
     var proto_render = {};
 
@@ -469,9 +471,21 @@ var Renderer = (function contructRenderer() {
 
         }
 
+        tics += 1;
+
         updateValues();
 
         updateDisplay();
+
+        if (temp_time + 1000 < getTime()) {
+
+            temp_time = getTime();
+
+            document.querySelector('[name="frame_rate"]').innerHTML = tics;
+
+            tics = 0;
+
+        }
 
         if (animating === true) {
 
@@ -519,6 +533,9 @@ var Renderer = (function contructRenderer() {
         }
 
         animating = true;
+
+        temp_time = 0;
+        tics = 0;
 
         tic();
 

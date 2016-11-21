@@ -94,7 +94,7 @@ var Renderer = (function contructRenderer() {
     }
 
     //#REFACTOR: the randomised movement to use the genome!
-    function moveEntity(entity) {
+    function moveEntityInRandomDirection(entity) {
 
         var direction;
 
@@ -163,14 +163,12 @@ var Renderer = (function contructRenderer() {
 
     function moveEntities(p_entities) {
 
-        p_entities.map(moveEntity);
+        p_entities.map(moveEntityInRandomDirection);
 
     }
 
-    //#REFACTOR: See drawEntity
-    function addEntitiesToGrid(p_entities, p_grid) {
+    function getCellsFromEntity(p_entity) {
 
-        var entity;
         var x;
         var w;
         var y;
@@ -181,7 +179,54 @@ var Renderer = (function contructRenderer() {
         var ceil = Math.ceil;
         var width = WIDTH;
         var height = HEIGHT;
-        var half_size;
+
+        var half_size = (p_entity.size() / 2);
+
+        var cells = [];
+
+        x = max(0, ceil(p_entity.x - half_size)) | 0;
+        w = min(width, ceil(x + p_entity.size())) | 0;
+
+        for (x; x < w; x += 1) {
+
+            y = max(0, ceil(p_entity.y - half_size)) | 0;
+            h = min(height, ceil(y + p_entity.size())) | 0;
+
+            for (y; y < h; y += 1) {
+
+                cells.push({'x': x, 'y': y});
+
+            }
+
+        }
+
+        return cells;
+
+    }
+
+    function addEntityToGrid(p_entity, p_grid, p_entity_index) {
+
+        var cell;
+
+        var entity_cells = getCellsFromEntity(p_entity);
+
+        var i = 0;
+        var n = entity_cells.length;
+
+        for (i; i < n; i += 1) {
+
+            cell = entity_cells[i];
+
+            Grid.addOccupant(p_grid, cell.x, cell.y, p_entity_index);
+
+        }
+
+    }
+
+    //#REFACTOR: See drawEntity
+    function addEntitiesToGrid(p_entities, p_grid) {
+
+        var entity;
 
         var i = 0;
         var n = p_entities.length;
@@ -190,22 +235,7 @@ var Renderer = (function contructRenderer() {
 
             entity = p_entities[i];
 
-            half_size = (entity.size() / 2);
-            x = max(0, ceil(entity.x - half_size)) | 0;
-            w = min(width, ceil(x + entity.size())) | 0;
-
-            for (x; x < w; x += 1) {
-
-                y = max(0, ceil(entity.y - half_size)) | 0;
-                h = min(height, ceil(y + entity.size())) | 0;
-
-                for (y; y < h; y += 1) {
-
-                    Grid.addOccupant(p_grid, x, y, i);
-
-                }
-
-            }
+            addEntityToGrid(entity, p_grid, i);
 
         }
 
@@ -283,19 +313,31 @@ var Renderer = (function contructRenderer() {
 
                             entity = entities[i];
 
-                            if (entity.status === 0) { continue; }
+                            if (entity.status === 0) {
+
+                                continue;
+
+                            }
 
                             j = 0;
 
                             for (j; j < n; j += 1) {
 
                                 // Skip if targeting entity itself
-                                if (i === j) { continue; }
+                                if (i === j) {
+
+                                    continue;
+
+                                }
 
                                 target = entities[j];
 
                                 // Skip dead things
-                                if (target.status !== 1) { continue; }
+                                if (target.status !== 1) {
+
+                                    continue;
+
+                                }
 
                                 like = checkForLikableTrait(entity, target);
 

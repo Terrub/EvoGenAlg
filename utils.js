@@ -12,6 +12,12 @@ function isUndefined(value) {
 
 }
 
+function isDefined(value) {
+
+    return !isUndefined(value);
+
+}
+
 function isBoolean(value) {
 
     return ( typeof value === "boolean" );

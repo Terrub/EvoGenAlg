@@ -313,7 +313,7 @@ var Renderer = (function contructRenderer() {
 
                             entity = entities[i];
 
-                            if (entity.status === 0) {
+                            if (!isEntityAlive(entity)) {
 
                                 continue;
 
@@ -323,7 +323,7 @@ var Renderer = (function contructRenderer() {
 
                             for (j; j < n; j += 1) {
 
-                                // Skip if targeting entity itself
+                                // Skip if entity is targeting itself
                                 if (i === j) {
 
                                     continue;
@@ -333,7 +333,7 @@ var Renderer = (function contructRenderer() {
                                 target = entities[j];
 
                                 // Skip dead things
-                                if (target.status !== 1) {
+                                if (!isEntityAlive(target)) {
 
                                     continue;
 

@@ -176,6 +176,12 @@ function canEntityMateTarget(p_entity, p_target) {
 
 }
 
+function isEntityAlive(p_entity) {
+
+    return (p_entity.status === 1);
+
+}
+
 // I FEEL DIRTY HAVING WRITTEN THIS!!!! OMG!!!!
 function mate(p_entity, p_target) {
 
@@ -387,9 +393,9 @@ function getEntities(amount) {
     ropBotTestRunner(
         "Entity is alive.",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
-        1,
+        true,
         () => {
-            return entity.status;
+            return isEntityAlive(entity);
         }
     )
 

@@ -144,7 +144,7 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function resolveEntityActions(p_entities) {
+    function resolveEntityMovement(p_entities) {
 
         var entity;
 
@@ -155,13 +155,160 @@ var Renderer = (function contructRenderer() {
 
             entity = p_entities[i];
 
-            resolveActionAttempt(entity);
+            resolveMoveAttempt(entity);
 
         }
 
     }
 
+    function getTouchingEntities(p_entities, p_touching_entities) {
+
+        var row;
+        var col;
+        var occupants;
+        var occupant_ids;
+        var entity_id;
+        var target_id;
+
+        var w = WIDTH;
+        var h = HEIGHT;
+
+        var touching_entities = {};
+
+        row = 0;
+
+        for (row; row < w; row += 1) {
+
+            col = 0;
+
+            for (col; col < h; col += 1) {
+
+                if (Grid.isOccupied(grid, row, col)) {
+
+                    occupants = Grid.getOccupants(grid, row, col);
+
+                    occupant_ids = Object.keys(occupants);
+
+                    if (occupant_ids.length > 1) {
+
+                        i = 0;
+                        n = occupant_ids.length;
+
+                        for (i; i < n; i += 1) {
+
+                            entity_id = occupant_ids[i];
+
+                            if (isUndefined(touching_entities[entity_id])) {
+
+                                touching_entities[entity_id] = {};
+
+                            }
+
+                            for (j; j < m; j += 1) {
+
+                                // Skip entity itself.
+                                if (i === j) {
+
+                                    continue;
+
+                                }
+
+                                target_id = occupant_ids[j];
+
+                                if (!touching_entities[entity_id][target_id]) {
+
+                                    touching_entities[entity_id][target_id] = true;
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        return touching_entities;
+
+    }
+
+    function queueEntityActionAttempts(p_entities, p_action_queue) {
+
+        var entity_id;
+        var entity_targets;
+        var target_id;
+
+        var entity;
+        var target;
+
+        var intent;
+        var action;
+
+        var touching_entities = getTouchingEntities(p_entities);
+
+        for (entity_id in touching_entities) {
+
+            entity_targets = touching_entities[entity_id];
+
+            for (target_id in entity_targets) {
+
+                entity = p_entities[entity_id];
+                target = p_entities[target_id];
+
+                intent = getEntityActionForTouchingTarget(entity, target);
+
+                action = actions[intent];
+
+                if (!isUndefined(action)) {
+
+                    p_action_queue.push({"entity": entity, "action": action});
+
+                }
+
+            }
+
+        }
+
+    }
+
+    function resolveActionQueue(p_action_queue) {
+
+        var action;
+        var entity;
+        var queue_slot;
+
+        var i = 0;
+        var n = p_action_queue.lenght;
+
+        p_action_queue.sort(sortActionQueueOnEntitySpeed);
+
+        while (p_action_queue.length > 0) {
+
+            queue_slot = p_action_queue.pop();
+
+            // entity = queue_slot.entity;
+
+            action = queue_slot.action;
+
+            if (!isUndefined(action)) {
+
+                ;
+
+            }
+
+        }
+
+    }
+
+    // DEPRECATED
     function moveEntities(p_entities) {
+
+        report("call to 'moveEntities' detected. function is DEPRECATED");
 
         p_entities.map(moveEntityInRandomDirection);
 
@@ -244,6 +391,12 @@ var Renderer = (function contructRenderer() {
     function sortEntitiesOnSpeed(p_left_entity, p_right_entity) {
 
         return p_right_entity.speed() - p_left_entity.speed();
+
+    }
+
+    function sortActionQueueOnEntitySpeed(p_left_action, p_right_action) {
+
+        return p_left_action.entity.speed() - p_right_action.entity.speed();
 
     }
 
@@ -442,19 +595,23 @@ var Renderer = (function contructRenderer() {
 
     function updateValues() {
 
+        var action_queue = [];
+
         updateEntityCounters(entities);
 
-        resolveEntityActions(entities);
-
-        // moveEntities(entities);
+        resolveEntityMovement(entities);
 
         Grid.reset(grid);
 
         addEntitiesToGrid(entities, grid);
 
-        new_children = resolveTouchingEntities(entities, grid);
+        queueEntityActionAttempts(entities, action_queue);
 
-        entities = entities.concat(new_children);
+        resolveActionQueue(action_queue);
+
+        // new_children = resolveTouchingEntities(entities, grid);
+
+        // entities = entities.concat(new_children);
 
         entities.map(checkForDeath);
 

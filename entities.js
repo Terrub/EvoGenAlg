@@ -235,7 +235,7 @@ function updateCounters(p_entity) {
 
 }
 
-function resolveActionAttempt(p_entity) {
+function resolveMoveAttempt(p_entity) {
 
     var direction;
 
@@ -249,6 +249,46 @@ function resolveActionAttempt(p_entity) {
         p_entity.cooldown_counter = ACTIONS_COSTS_MOVE;
 
     }
+
+}
+
+function getMateAction(p_entity, p_target) {
+
+    function proto_mateAction() {
+
+        return mate(p_entity, p_target);
+
+    }
+
+    return proto_mateAction;
+
+}
+
+function getKillAction(p_target) {
+
+    function proto_killAction() {
+
+        killEntity(p_target);
+
+    }
+
+}
+
+function getEntityActionForTouchingTarget(p_entity, p_target) {
+
+    var action;
+
+    if (canEntityMateTarget(p_entity, p_target)) {
+
+        action = "mate"; //getMateAction(p_entity, p_target);
+
+    } else if(canEntityKillTarget(p_entity, p_target)) {
+
+        action = "kill"; //getKillAction(p_target);
+
+    }
+
+    return action;
 
 }
 

@@ -12,10 +12,15 @@ var TRAITS = {
     "STRENGTH": {
         "index": 1,
         "range": 100,
-        "offset": 0
+        "offset": 1
+    },
+    "VITALITY": {
+        "index": 2,
+        "range": 100,
+        "offset": 1
     },
     "SIZE": {
-        "index": 2,
+        "index": 3,
         "range": 20,
         "offset": 1
     },
@@ -30,13 +35,11 @@ var TRAITS = {
         "offset": 0
     },
     "BLUE": {
-        "target": "SIZE",
+        "target": "VITALITY",
         "range": 256,
         "offset": 0
     }
 }
-
-var ACTIONS_COSTS_MOVE = 300;
 
 function generateRandomGenome() {
 
@@ -116,14 +119,6 @@ function getTraitFromGenome(p_genome, p_trait) {
 
 }
 
-function getEntitySize(p_entity) {
-
-    var size = getTraitFromGenome(p_entity.genome, TRAITS.SIZE);
-
-    return size;
-
-}
-
 function getEntityColor(p_entity) {
 
     var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
@@ -135,55 +130,47 @@ function getEntityColor(p_entity) {
 
 }
 
-function getEntitySpeed(p_entity) {
-
-    var speed = getTraitFromGenome(p_entity.genome, TRAITS.SPEED);
-
-    return speed;
-
-}
-
-function getEntityStrength(p_entity) {
-
-    var strength = getTraitFromGenome(p_entity.genome, TRAITS.STRENGTH);
-
-    return strength;
-
-}
-
 // NOTE: I should add a trait that lowers or highers these numbers as a quick
 //  and temporary fix to jack up the diversity.
 function checkForLikableTrait(p_entity, p_target) {
 
-    var higher_str = p_entity.strength() < p_target.strength();
-    var higher_spd = p_entity.speed() < p_target.speed();
-    var bigger = p_entity.size() < p_target.size();
+    var max = Math.max;
 
-    return (higher_spd || higher_str || bigger);
+    var d_str = max(0, p_target.strength() - p_entity.strength());
+    var d_spd = max(0, p_target.speed() - p_entity.speed());
+    var d_size = max(0, p_target.size() - p_entity.size());
 
-}
+    var total = d_str + d_spd + d_size;
 
-function calculateEntityFitness(p_entity) {
-
-    return (p_entity.size() + p_entity.strength() + p_entity.speed()) / 3;
+    return total >= 8;
 
 }
 
-function canEntityMateTarget(p_entity, p_target) {
+function checkForHostility(p_entity, p_target) {
 
-    // For now... if the target cannot kill us... we can breed with it.
-    return !canEntityKillTarget(p_target, p_entity);
+    var d_str = (0, p_target.strength() - p_entity.strength());
+    var d_spd = (0, p_target.speed() - p_entity.speed());
+    var d_size = (0, p_target.size() - p_entity.size());
+
+    var total = d_str + d_spd + d_size;
+
+    return total < 0;
 
 }
 
 function isEntityAlive(p_entity) {
 
-    return (p_entity.status === 1);
+    return (p_entity.genome.sequence[TRAITS.VITALITY.index] > 0);
 
 }
 
-// I FEEL DIRTY HAVING WRITTEN THIS!!!! OMG!!!!
-function mate(p_entity, p_target) {
+function isEntityBusy(p_entity) {
+
+    return (p_entity.cooldown_counter > 0);
+
+}
+
+function spawnOffspringWithTarget(p_entity, p_target) {
 
     var genome;
     var trait;
@@ -220,57 +207,14 @@ function mate(p_entity, p_target) {
 
 }
 
-function canEntityKillTarget(p_entity, p_target) {
-
-    return calculateEntityFitness(p_entity) >= calculateEntityFitness(p_target);
-
-}
-
 function updateCounters(p_entity) {
 
     var max = Math.max;
-    var proposed_cooldown = p_entity.cooldown_counter - p_entity.speed();
+    var size_hinderance = (1 - (p_entity.genome.sequence[TRAITS.SIZE.index] * 0.3));
+    var offset = (p_entity.speed() * size_hinderance);
+    var proposed_cooldown = p_entity.cooldown_counter - offset;
 
     p_entity.cooldown_counter = max(0, proposed_cooldown);
-
-}
-
-function resolveMoveAttempt(p_entity) {
-
-    var direction;
-
-    if (p_entity.cooldown_counter === 0) {
-
-        direction = Renderer.getRandomDirection();
-
-        p_entity.x += direction.x * 2;
-        p_entity.y += direction.y * 2;
-
-        p_entity.cooldown_counter = ACTIONS_COSTS_MOVE;
-
-    }
-
-}
-
-function getMateAction(p_entity, p_target) {
-
-    function proto_mateAction() {
-
-        return mate(p_entity, p_target);
-
-    }
-
-    return proto_mateAction;
-
-}
-
-function getKillAction(p_target) {
-
-    function proto_killAction() {
-
-        killEntity(p_target);
-
-    }
 
 }
 
@@ -278,13 +222,17 @@ function getEntityActionForTouchingTarget(p_entity, p_target) {
 
     var action;
 
-    if (canEntityMateTarget(p_entity, p_target)) {
+    if (checkForLikableTrait(p_entity, p_target)) {
 
-        action = "mate"; //getMateAction(p_entity, p_target);
+        action = "mate";
 
-    } else if(canEntityKillTarget(p_entity, p_target)) {
+    } else if (checkForHostility(p_entity, p_target)) {
 
-        action = "kill"; //getKillAction(p_target);
+        action = "kill";
+
+    } else {
+
+        action = "move";
 
     }
 
@@ -292,13 +240,18 @@ function getEntityActionForTouchingTarget(p_entity, p_target) {
 
 }
 
-function killEntity(p_entity) {
+function attackEntity(p_entity, p_target) {
 
-    p_entity.status = 0;
+    var target_vit = p_target.genome.sequence[TRAITS.VITALITY.index];
+    var entity_str = p_entity.genome.sequence[TRAITS.STRENGTH.index];
+
+    var new_trait = Math.max(0, Math.min(1, (target_vit - entity_str)));
+
+    p_target.genome.sequence[TRAITS.VITALITY.index] = new_trait;
 
 }
 
-
+//#TODO: Refactor entity traits into object getters instead.
 function createEntity(p_genome) {
 
     var entity;
@@ -308,15 +261,39 @@ function createEntity(p_genome) {
 
     entity.x = 0;
     entity.y = 0;
-    entity.status = 1;
     entity.cooldown_counter = 0;
 
     entity.genome = p_genome;
 
-    entity.size = () => { return getEntitySize(entity) };
-    entity.color = () => { return getEntityColor(entity) };
-    entity.speed = () => { return getEntitySpeed(entity) };
-    entity.strength = () => { return getEntityStrength(entity) };
+    entity.color = () => {
+
+        return getEntityColor(entity);
+
+    };
+
+    entity.size = () => {
+
+        return getTraitFromGenome(entity.genome, TRAITS.SIZE);
+
+    };
+
+    entity.speed = () => {
+
+        return getTraitFromGenome(entity.genome, TRAITS.SPEED);
+
+    };
+
+    entity.strength = () => {
+
+        return getTraitFromGenome(entity.genome, TRAITS.STRENGTH);
+
+    };
+
+    entity.vitality = () => {
+
+        return getTraitFromGenome(entity.genome, TRAITS.VITALITY);
+
+    };
 
     return entity;
 
@@ -398,7 +375,7 @@ function getEntities(amount) {
     )
 
     ropBotTestRunner(
-        "Entity has a speed between 0 (incl) and 3 (exl.)",
+        "Entity has a speed between trait 1 (incl.) and 100 (incl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
@@ -409,13 +386,24 @@ function getEntities(amount) {
     )
 
     ropBotTestRunner(
-        "Entity has a strength between 0 (incl) and 100 (exl.)",
+        "Entity has a strength trait between 1 (incl.) and 100 (incl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
             return (isInteger(entity.strength())
-                && entity.strength() >= 0
-                && entity.strength() < 100);
+                && entity.strength() > 0
+                && entity.strength() <= 100);
+        }
+    )
+
+    ropBotTestRunner(
+        "Entity has a vitality trait between 1 (incl.) and 100 (incl.)",
+        ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        () => {
+            return (isInteger(entity.vitality())
+                && entity.vitality() > 0
+                && entity.vitality() <= 100);
         }
     )
 

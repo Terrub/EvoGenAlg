@@ -53,6 +53,50 @@ var Renderer = (function contructRenderer() {
     var tics = 0;
 
     var proto_render = {};
+    var ACTIONS_COSTS_MATE = 8000;
+    var ACTIONS_COSTS_KILL = 500;
+    var ACTIONS_COSTS_MOVE = 300;
+    var NEW_BORN_COOLDOWN = 4000;
+
+    var actions = {
+        'mate': function (p_entity, p_target) {
+
+            var offspring = spawnOffspringWithTarget(p_entity, p_target);
+            var direction = getRandomDirection();
+
+            offspring.cooldown_counter = NEW_BORN_COOLDOWN;
+
+            offspring.x = (p_entity.x + p_target.x) / 2;
+            offspring.y = (p_entity.y + p_target.y) / 2;
+
+            offspring.x += (offspring.size() * Math.random() * 2 * direction.x);
+            offspring.y += (offspring.size() * Math.random() * 2 * direction.y);
+
+            entities.push(offspring);
+
+            p_entity.cooldown_counter = ACTIONS_COSTS_MATE;
+
+        },
+
+        'kill': function (p_entity, p_target) {
+
+            attackEntity(p_entity, p_target);
+
+            p_entity.cooldown_counter = ACTIONS_COSTS_KILL;
+
+        },
+
+        'move': function (p_entity, p_target) {
+
+            var direction = getRandomDirection();
+
+            p_entity.x += direction.x * Math.random() * (p_entity.size() * 0.5);
+            p_entity.y += direction.y * Math.random() * (p_entity.size() * 0.5);
+
+            p_entity.cooldown_counter = ACTIONS_COSTS_MOVE;
+
+        }
+    }
 
     function createDisplay() {
 
@@ -93,35 +137,26 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    //#REFACTOR: the randomised movement to use the genome!
-    function moveEntityInRandomDirection(entity) {
-
-        var direction;
-
-        direction = getRandomDirection();
-
-        entity.x += entity.speed() * direction.x;
-        entity.y += entity.speed() * direction.y;
-
-    }
-
     function getLivingEntities(p_entities) {
 
-        var entities;
+        var entity;
 
-        function addLivingEntity(entity) {
+        var entities = [];
 
-            if (entity.status !== 0) {
+        var i = 0;
+        var n = p_entities.length;
+
+        for ( i; i < n; i += 1 ) {
+
+            entity = p_entities[i];
+
+            if (isEntityAlive(entity)) {
 
                 entities.push(entity);
 
             }
 
         }
-
-        entities = [];
-
-        p_entities.map(addLivingEntity);
 
         return entities;
 
@@ -144,24 +179,7 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function resolveEntityMovement(p_entities) {
-
-        var entity;
-
-        var i = 0;
-        var n = p_entities.length;
-
-        for ( i; i < n; i += 1 ) {
-
-            entity = p_entities[i];
-
-            resolveMoveAttempt(entity);
-
-        }
-
-    }
-
-    function getTouchingEntities(p_entities, p_touching_entities) {
+    function getTouchingEntities(p_entities) {
 
         var row;
         var col;
@@ -169,6 +187,10 @@ var Renderer = (function contructRenderer() {
         var occupant_ids;
         var entity_id;
         var target_id;
+
+        var i;
+        var n;
+        var j;
 
         var w = WIDTH;
         var h = HEIGHT;
@@ -204,7 +226,9 @@ var Renderer = (function contructRenderer() {
 
                             }
 
-                            for (j; j < m; j += 1) {
+                            j = 0;
+
+                            for (j; j < n; j += 1) {
 
                                 // Skip entity itself.
                                 if (i === j) {
@@ -245,30 +269,49 @@ var Renderer = (function contructRenderer() {
 
         var entity;
         var target;
-
-        var intent;
         var action;
 
         var touching_entities = getTouchingEntities(p_entities);
 
-        for (entity_id in touching_entities) {
+        var i = 0;
+        var n = p_entities.length;
 
-            entity_targets = touching_entities[entity_id];
+        for (i; i < n; i += 1) {
 
-            for (target_id in entity_targets) {
+            entity = p_entities[i];
 
-                entity = p_entities[entity_id];
-                target = p_entities[target_id];
+            if (isEntityBusy(entity)) {
 
-                intent = getEntityActionForTouchingTarget(entity, target);
+                continue;
 
-                action = actions[intent];
+            }
 
-                if (!isUndefined(action)) {
+            entity_targets = touching_entities[i];
 
-                    p_action_queue.push({"entity": entity, "action": action});
+            if (isDefined(entity_targets)) {
+
+                for (target_id in entity_targets) {
+
+                    target = p_entities[target_id];
+
+                    action = getEntityActionForTouchingTarget(entity, target);
+
+                    p_action_queue.push({
+                        "action": action,
+                        "entity": entity,
+                        "target": target
+                    });
 
                 }
+
+            } else {
+
+                action = "move";
+
+                p_action_queue.push({
+                    "action": action,
+                    "entity": entity
+                });
 
             }
 
@@ -278,12 +321,11 @@ var Renderer = (function contructRenderer() {
 
     function resolveActionQueue(p_action_queue) {
 
-        var action;
-        var entity;
         var queue_slot;
-
-        var i = 0;
-        var n = p_action_queue.lenght;
+        var entity;
+        var target;
+        var action;
+        var execution;
 
         p_action_queue.sort(sortActionQueueOnEntitySpeed);
 
@@ -291,26 +333,28 @@ var Renderer = (function contructRenderer() {
 
             queue_slot = p_action_queue.pop();
 
-            // entity = queue_slot.entity;
+            entity = queue_slot.entity;
 
-            action = queue_slot.action;
+            if (!isEntityBusy(entity)) {
 
-            if (!isUndefined(action)) {
+                target = queue_slot.target;
+                action = queue_slot.action;
 
-                ;
+                if (isDefined(action)) {
+
+                    execution = actions[action];
+
+                    if (isDefined(execution)) {
+
+                        execution(entity, target);
+
+                    }
+
+                }
 
             }
 
         }
-
-    }
-
-    // DEPRECATED
-    function moveEntities(p_entities) {
-
-        report("call to 'moveEntities' detected. function is DEPRECATED");
-
-        p_entities.map(moveEntityInRandomDirection);
 
     }
 
@@ -388,174 +432,19 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function sortEntitiesOnSpeed(p_left_entity, p_right_entity) {
-
-        return p_right_entity.speed() - p_left_entity.speed();
-
-    }
-
     function sortActionQueueOnEntitySpeed(p_left_action, p_right_action) {
 
         return p_left_action.entity.speed() - p_right_action.entity.speed();
 
     }
 
-    //#REFACTOR: too many indents. we can clean this up I'm sure!
-    function resolveTouchingEntities(p_entities, p_grid) {
-
-        var row;
-        var col;
-
-        var occupants;
-        var occupant_ids;
-        var entities;
-        var id;
-        var entity;
-        var target;
-        var like;
-        var child;
-
-        var i;
-        var n;
-        var j;
-
-        var direction;
-
-        var w = WIDTH;
-        var h = HEIGHT;
-
-        var new_children = [];
-
-        row = 0;
-
-        for (row; row < w; row += 1) {
-
-            col = 0;
-
-            for (col; col < h; col += 1) {
-
-
-                if ( Grid.isOccupied(grid, row, col)) {
-
-                    occupants = Grid.getOccupants(grid, row, col);
-
-                    occupant_ids = Object.keys(occupants);
-
-                    if (occupant_ids.length > 1) {
-
-                        entities = [];
-
-                        i = 0;
-                        n = occupant_ids.length;
-
-                        for (i; i < n; i += 1) {
-
-                            id = occupant_ids[i];
-                            entity = p_entities[id];
-                            entities.push(entity);
-
-                        }
-
-                        // ORDER BY speed DESC;
-                        entities.sort(sortEntitiesOnSpeed);
-
-                        i = 0;
-                        n = entities.length;
-
-                        for (i; i < n; i += 1) {
-
-                            entity = entities[i];
-
-                            if (!isEntityAlive(entity)) {
-
-                                continue;
-
-                            }
-
-                            j = 0;
-
-                            for (j; j < n; j += 1) {
-
-                                // Skip if entity is targeting itself
-                                if (i === j) {
-
-                                    continue;
-
-                                }
-
-                                target = entities[j];
-
-                                // Skip dead things
-                                if (!isEntityAlive(target)) {
-
-                                    continue;
-
-                                }
-
-                                like = checkForLikableTrait(entity, target);
-
-                                if (like && new_children.length < 20) {
-
-                                    if (canEntityMateTarget(entity, target)) {
-
-                                        child = mate(entity, target);
-
-                                        child.x = (entity.x + target.x) / 2;
-                                        child.y = (entity.y + target.y) / 2;
-
-                                        direction = getRandomDirection();
-
-                                        child.x += (child.size() * Math.random() * 2 * direction.x);
-                                        child.y += (child.size() * Math.random() * 2 * direction.y);
-
-                                        new_children.push(child);
-
-                                    }
-
-                                } else {
-
-                                    if (canEntityKillTarget(entity, target)) {
-
-                                        killEntity(target);
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        return new_children;
-
-    }
-
     function isOutOfBounds(entity) {
 
-        var left = (entity.x < 0);
-        var right = (entity.x > WIDTH);
-        var top = (entity.y < 0);
-        var bottom = (entity.y > HEIGHT);
+        if (entity.x < 0) { entity.x += WIDTH; }
+        if (entity.y < 0) { entity.y += HEIGHT; }
 
-        return (left || right || top || bottom);
-
-    }
-
-    function checkForDeath(entity) {
-
-        if (isOutOfBounds(entity)) {
-
-            killEntity(entity);
-
-        }
+        if (entity.x > WIDTH) { entity.x -= WIDTH; }
+        if (entity.y > HEIGHT) { entity.y -= HEIGHT; }
 
     }
 
@@ -578,8 +467,8 @@ var Renderer = (function contructRenderer() {
 
             entity = p_entities[i];
 
-            // Mutate 20% of the time for now.
-            is_mutating = ((Math.random() + 0.2) > 1);
+            // Mutate 2% of the time for now.
+            is_mutating = ((Math.random() + 0.02) > 1);
 
             if (is_mutating) {
 
@@ -597,23 +486,17 @@ var Renderer = (function contructRenderer() {
 
         var action_queue = [];
 
-        updateEntityCounters(entities);
-
-        resolveEntityMovement(entities);
-
         Grid.reset(grid);
 
         addEntitiesToGrid(entities, grid);
+
+        updateEntityCounters(entities);
 
         queueEntityActionAttempts(entities, action_queue);
 
         resolveActionQueue(action_queue);
 
-        // new_children = resolveTouchingEntities(entities, grid);
-
-        // entities = entities.concat(new_children);
-
-        entities.map(checkForDeath);
+        entities.map(isOutOfBounds);
 
         entities = getLivingEntities(entities);
 
@@ -685,6 +568,8 @@ var Renderer = (function contructRenderer() {
             tics = 0;
 
         }
+
+        document.querySelector('[name="entity_count"]').value = entities.length;
 
         if (animating === true) {
 
@@ -769,7 +654,6 @@ var Renderer = (function contructRenderer() {
     proto_render.start = start;
     proto_render.stop = stop;
     proto_render.reset = reset;
-    proto_render.getRandomDirection = getRandomDirection;
 
     return proto_render;
 

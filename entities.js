@@ -2,66 +2,43 @@
 
 //#REFACTOR this into a separate class already!!! DX
 // NOTE: While we're at it. I should probably discern traits from properties or
-//  attributes. The RGB values for instances are not traits but properties.
+//  attributes. The RGB values for instance are not traits but properties.
 var TRAITS = {
-    "SPEED": {
-        "index": 0,
-        "range": 100,
-        "offset": 1
-    },
-    "STRENGTH": {
-        "index": 1,
-        "range": 100,
-        "offset": 1
-    },
-    "VITALITY": {
-        "index": 2,
-        "range": 100,
-        "offset": 1
-    },
-    "SIZE": {
-        "index": 3,
-        "range": 20,
-        "offset": 1
-    },
-    "RED": {
-        "target": "STRENGTH",
-        "range": 256,
-        "offset": 0
-    },
-    "GREEN": {
-        "target": "SPEED",
-        "range": 256,
-        "offset": 0
-    },
-    "BLUE": {
-        "target": "VITALITY",
-        "range": 256,
-        "offset": 0
+    "speed": true,
+    "strength": true,
+    "vitality": true,
+    "size": true,
+    "red": true,
+    "green": true,
+    "blue": true
+};
+
+function generateRandomSequence(p_traits) {
+
+    var trait_name;
+
+    var i = 0;
+    var sequence = [];
+
+    for (trait_name in p_traits) {
+
+        sequence[i] = Math.random();
+
+        i += 1;
+
     }
+
+    return sequence;
+
 }
 
 function generateRandomGenome() {
 
     var genome;
-    var trait;
-    var trait_name;
 
     genome = {
-        "sequence": []
+        "sequence": generateRandomSequence(TRAITS)
     };
-
-    for (trait_name in TRAITS) {
-
-        trait = TRAITS[trait_name];
-
-        if (!isUndefined(trait.index)) {
-
-            genome.sequence[trait.index] = Math.random();
-
-        }
-
-    }
 
     return genome;
 
@@ -76,9 +53,7 @@ function mutateEntity(p_entity) {
 
     for (trait_name in TRAITS) {
 
-        trait = TRAITS[trait_name];
-
-        if (!isUndefined(trait.index)) {
+        if (Math.round(Math.random() + 0.2) > 1) {
 
             if (Math.round(Math.random()) === 1) {
 
@@ -90,9 +65,7 @@ function mutateEntity(p_entity) {
 
             }
 
-            new_trait = p_entity.genome.sequence[trait.index] + mutation_offset;
-
-            p_entity.genome.sequence[trait.index] = Math.max(0, Math.min(1, new_trait));
+            p_entity[trait_name] += mutation_offset;
 
         }
 
@@ -100,33 +73,13 @@ function mutateEntity(p_entity) {
 
 }
 
-function getTraitFromGenome(p_genome, p_trait) {
-
-    var value;
-
-    var sequence = p_genome.sequence;
-    var trait = p_trait;
-
-    if (!isUndefined(p_trait.target)) {
-
-        trait = TRAITS[p_trait.target];
-
-    }
-
-    value = sequence[trait.index];
-
-    return (value * p_trait.range) + p_trait.offset | 0;
-
-}
-
 function getEntityColor(p_entity) {
 
-    var red = getTraitFromGenome(p_entity.genome, TRAITS.RED);
-    var green = getTraitFromGenome(p_entity.genome, TRAITS.GREEN);
-    var blue = getTraitFromGenome(p_entity.genome, TRAITS.BLUE);
-    var color = "rgba(" + red + "," + green + "," + blue + ",1)";
+    var red = p_entity.red * 256 | 0;
+    var green = p_entity.green * 256 | 0;
+    var blue = p_entity.blue * 256 | 0;
 
-    return color;
+    return "rgba(" + red + "," + green + "," + blue + ",1)";
 
 }
 
@@ -136,21 +89,21 @@ function checkForLikableTrait(p_entity, p_target) {
 
     var max = Math.max;
 
-    var d_str = max(0, p_target.strength() - p_entity.strength());
-    var d_spd = max(0, p_target.speed() - p_entity.speed());
-    var d_size = max(0, p_target.size() - p_entity.size());
+    var d_str = max(0, p_target.strength - p_entity.strength);
+    var d_spd = max(0, p_target.speed - p_entity.speed);
+    var d_size = max(0, p_target.size - p_entity.size);
 
     var total = d_str + d_spd + d_size;
 
-    return total >= 8;
+    return total > 0;
 
 }
 
 function checkForHostility(p_entity, p_target) {
 
-    var d_str = (0, p_target.strength() - p_entity.strength());
-    var d_spd = (0, p_target.speed() - p_entity.speed());
-    var d_size = (0, p_target.size() - p_entity.size());
+    var d_str = (p_target.strength - p_entity.strength);
+    var d_spd = (p_target.speed - p_entity.speed);
+    var d_size = (p_target.size - p_entity.size);
 
     var total = d_str + d_spd + d_size;
 
@@ -160,13 +113,48 @@ function checkForHostility(p_entity, p_target) {
 
 function isEntityAlive(p_entity) {
 
-    return (p_entity.genome.sequence[TRAITS.VITALITY.index] > 0);
+    return (p_entity.vitality > 0);
 
 }
 
 function isEntityBusy(p_entity) {
 
     return (p_entity.cooldown_counter > 0);
+
+}
+
+function combineParentSequences(p_entity, p_target) {
+
+    var trait_name;
+    var left;
+    var right;
+    var trait;
+
+    var sequence = [];
+    var i = 0;
+
+    for (trait_name in TRAITS) {
+
+        left = p_entity[trait_name];
+        right = p_target[trait_name];
+
+        if (Math.round(Math.random()) === 1) {
+
+            trait = left;
+
+        } else {
+
+            trait = right;
+
+        }
+
+        sequence[i] = trait;
+
+        i += 1;
+
+    }
+
+    return sequence;
 
 }
 
@@ -178,30 +166,8 @@ function spawnOffspringWithTarget(p_entity, p_target) {
     var host;
 
     genome = {
-        "sequence": []
+        "sequence": combineParentSequences(p_entity, p_target)
     };
-
-    for (trait_name in TRAITS) {
-
-        trait = TRAITS[trait_name];
-
-        if (!isUndefined(trait.index)) {
-
-            if (Math.round(Math.random()) === 1) {
-
-                host = p_entity;
-
-            } else {
-
-                host = p_target;
-
-            }
-
-            genome.sequence[trait.index] = host.genome.sequence[trait.index];
-
-        }
-
-    }
 
     return createEntity(genome);
 
@@ -210,9 +176,7 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 function updateCounters(p_entity) {
 
     var max = Math.max;
-    var size_hinderance = (1 - (p_entity.genome.sequence[TRAITS.SIZE.index] * 0.3));
-    var offset = (p_entity.speed() * size_hinderance);
-    var proposed_cooldown = p_entity.cooldown_counter - offset;
+    var proposed_cooldown = p_entity.cooldown_counter - p_entity.speed;
 
     p_entity.cooldown_counter = max(0, proposed_cooldown);
 
@@ -242,12 +206,12 @@ function getEntityActionForTouchingTarget(p_entity, p_target) {
 
 function attackEntity(p_entity, p_target) {
 
-    var target_vit = p_target.genome.sequence[TRAITS.VITALITY.index];
-    var entity_str = p_entity.genome.sequence[TRAITS.STRENGTH.index];
+    var vit = p_target.vitality;
+    var str = p_entity.strength;
 
-    var new_trait = Math.max(0, Math.min(1, (target_vit - entity_str)));
+    var adjusted_vit = Math.max(0, Math.min(1, (vit - str)));
 
-    p_target.genome.sequence[TRAITS.VITALITY.index] = new_trait;
+    p_target.vit = adjusted_vit;
 
 }
 
@@ -255,7 +219,8 @@ function attackEntity(p_entity, p_target) {
 function createEntity(p_genome) {
 
     var entity;
-    var size;
+    var i;
+    var trait_name;
 
     entity = {};
 
@@ -265,35 +230,26 @@ function createEntity(p_genome) {
 
     entity.genome = p_genome;
 
-    entity.color = () => {
+    i = 0;
 
-        return getEntityColor(entity);
+    // This is allowed to go wrong. It's called mutation :P
+    for (trait_name in TRAITS) {
 
-    };
+        entity[trait_name] = p_genome.sequence[i];
 
-    entity.size = () => {
+        i += 1;
 
-        return getTraitFromGenome(entity.genome, TRAITS.SIZE);
+    }
 
-    };
+    Object.defineProperty(entity, 'color', {
+        'get': function () {
 
-    entity.speed = () => {
+            return getEntityColor(entity);
 
-        return getTraitFromGenome(entity.genome, TRAITS.SPEED);
-
-    };
-
-    entity.strength = () => {
-
-        return getTraitFromGenome(entity.genome, TRAITS.STRENGTH);
-
-    };
-
-    entity.vitality = () => {
-
-        return getTraitFromGenome(entity.genome, TRAITS.VITALITY);
-
-    };
+        },
+        enumerable: true,
+        configurable: false
+    });
 
     return entity;
 
@@ -301,14 +257,13 @@ function createEntity(p_genome) {
 
 function getEntities(amount) {
 
-    var entities;
-    var i = 0;
-    var n = amount;
     var genome;
 
-    entities = [];
+    var i = 0;
+    var n = amount;
+    var entities = [];
 
-    for ( i; i < n; i += 1 ) {
+    for (i; i < n; i += 1) {
 
         genome = generateRandomGenome();
 
@@ -369,52 +324,52 @@ function getEntities(amount) {
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isString(entity.color())
-                && entity.color().length > 0);
+            return (isString(entity.color)
+                && entity.color.length > 0);
         }
     )
 
     ropBotTestRunner(
-        "Entity has a speed between trait 1 (incl.) and 100 (incl.)",
+        "Entity has a speed trait between 0 (incl.) and 1 (excl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isInteger(entity.speed())
-                && entity.speed() > 0
-                && entity.speed() <= 100);
+            return (isNumber(entity.speed)
+                && entity.speed >= 0
+                && entity.speed < 1);
         }
     )
 
     ropBotTestRunner(
-        "Entity has a strength trait between 1 (incl.) and 100 (incl.)",
+        "Entity has a strength trait between 0 (incl.) and 1 (excl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isInteger(entity.strength())
-                && entity.strength() > 0
-                && entity.strength() <= 100);
+            return (isNumber(entity.strength)
+                && entity.strength >= 0
+                && entity.strength < 1);
         }
     )
 
     ropBotTestRunner(
-        "Entity has a vitality trait between 1 (incl.) and 100 (incl.)",
+        "Entity has a vitality trait between 0 (incl.) and 1 (excl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isInteger(entity.vitality())
-                && entity.vitality() > 0
-                && entity.vitality() <= 100);
+            return (isNumber(entity.vitality)
+                && entity.vitality >= 0
+                && entity.vitality < 1);
         }
     )
 
     ropBotTestRunner(
-        "Entity has a size between 1 (incl) and 20 (incl.)",
+        "Entity has a size trait between 0 (incl.) and 1 (excl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isInteger(entity.size())
-                && entity.size() > 0
-                && entity.size() <= 20);
+            return (isNumber(entity.size)
+                && entity.size >= 0
+                && entity.size < 1);
         }
     )
 

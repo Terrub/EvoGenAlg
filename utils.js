@@ -185,6 +185,27 @@ function reportUsageError(error) {
 
 }
 
+var marker = (function define_marker() {
+
+    var caller = "first mark";
+    var last_call = getTime();
+    var now;
+
+    function proto_marker(p_caller) {
+
+        now = getTime();
+
+        report((now - last_call) + " ms since '" + caller + "' was called");
+
+        last_call = now;
+        caller = p_caller;
+
+    }
+
+    return proto_marker;
+
+}())
+
 // --------
 
 var formatise = ( function ConstructFormatise() {

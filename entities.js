@@ -4,27 +4,37 @@
 // NOTE: While we're at it. I should probably discern traits from properties or
 //  attributes. The RGB values for instance are not traits but properties.
 var TRAITS = {
-    "speed": true,
+    "stamina": true,
     "strength": true,
-    "vitality": true,
+    "energy": true,
     "size": true,
     "red": true,
     "green": true,
-    "blue": true
+    "blue": true,
+    "like": true,
+    "dislike": true
 };
+
+var NUM_TRAITS = Object.keys(TRAITS).length;
+
+var ACTIONS_COSTS_MATE = 5;
+var ACTIONS_COSTS_KILL = 0.5;
+var ACTIONS_COSTS_MOVE = 0.1;
 
 function generateRandomSequence(p_traits) {
 
     var trait_name;
 
+    var trait_names = Object.keys(p_traits);
+
     var i = 0;
+    var n = trait_names.length;
+
     var sequence = [];
 
-    for (trait_name in p_traits) {
+    for (i; i < n; i += 1) {
 
         sequence[i] = Math.random();
-
-        i += 1;
 
     }
 
@@ -46,16 +56,23 @@ function generateRandomGenome() {
 
 function mutateEntity(p_entity) {
 
-    var trait;
     var trait_name;
+    var trait_names = Object.keys(TRAITS);
     var mutation_offset;
-    var new_trait;
 
-    for (trait_name in TRAITS) {
+    var i = 0;
+    var n = trait_names.length;
 
-        if (Math.round(Math.random() + 0.2) > 1) {
+    var round = Math.round;
+    var rand = Math.random;
 
-            if (Math.round(Math.random()) === 1) {
+    for (i; i < n; i += 1) {
+
+        trait_name = trait_names[i];
+
+        if (round(rand()) + 0.2 > 1) {
+
+            if (round(rand()) === 1) {
 
                 mutation_offset = 0.01;
 
@@ -83,43 +100,32 @@ function getEntityColor(p_entity) {
 
 }
 
-// NOTE: I should add a trait that lowers or highers these numbers as a quick
-//  and temporary fix to jack up the diversity.
-function checkForLikableTrait(p_entity, p_target) {
+function getLikeFactorForEntity(p_entity, p_target) {
 
-    var max = Math.max;
+    var trait;
+    var trait_name;
 
-    var d_str = max(0, p_target.strength - p_entity.strength);
-    var d_spd = max(0, p_target.speed - p_entity.speed);
-    var d_size = max(0, p_target.size - p_entity.size);
+    var trait_names = Object.keys(TRAITS);
+    var i = 0;
+    var n = trait_names.length;
 
-    var total = d_str + d_spd + d_size;
+    var total = 0;
 
-    return total > 0;
+    for ( i; i < n; i += 1 ) {
 
-}
+        trait_name = trait_names[i];
 
-function checkForHostility(p_entity, p_target) {
+        total += p_target[trait_name] - p_entity[trait_name];
 
-    var d_str = (p_target.strength - p_entity.strength);
-    var d_spd = (p_target.speed - p_entity.speed);
-    var d_size = (p_target.size - p_entity.size);
+    }
 
-    var total = d_str + d_spd + d_size;
-
-    return total < 0;
+    return total;
 
 }
 
 function isEntityAlive(p_entity) {
 
-    return (p_entity.vitality > 0);
-
-}
-
-function isEntityBusy(p_entity) {
-
-    return (p_entity.cooldown_counter > 0);
+    return (p_entity.energy > 0);
 
 }
 
@@ -160,43 +166,48 @@ function combineParentSequences(p_entity, p_target) {
 
 function spawnOffspringWithTarget(p_entity, p_target) {
 
+    var offspring;
     var genome;
     var trait;
     var trait_name;
     var host;
 
+    p_entity.energy -= ACTIONS_COSTS_MATE;
+    p_target.energy -= ACTIONS_COSTS_MATE;
+
     genome = {
         "sequence": combineParentSequences(p_entity, p_target)
     };
 
-    return createEntity(genome);
+    offspring = createEntity(genome);
+
+    return offspring;
 
 }
 
 function updateCounters(p_entity) {
 
-    var max = Math.max;
-    var proposed_cooldown = p_entity.cooldown_counter - p_entity.speed;
-
-    p_entity.cooldown_counter = max(0, proposed_cooldown);
+    p_entity.energy += p_entity.stamina;
 
 }
 
 function getEntityActionForTouchingTarget(p_entity, p_target) {
 
-    var action;
+    var like_factor = getLikeFactorForEntity(p_entity, p_target);
+    var action = "move";
 
-    if (checkForLikableTrait(p_entity, p_target)) {
+    if (like_factor > (p_entity.like * NUM_TRAITS * 2) &&
+        p_entity.energy > ACTIONS_COSTS_MATE &&
+        p_target.energy > ACTIONS_COSTS_MATE) {
 
         action = "mate";
 
-    } else if (checkForHostility(p_entity, p_target)) {
+    }
+
+    if (p_entity.dislike > Math.random() &&
+        p_entity.energy > ACTIONS_COSTS_KILL) {
 
         action = "kill";
-
-    } else {
-
-        action = "move";
 
     }
 
@@ -204,14 +215,161 @@ function getEntityActionForTouchingTarget(p_entity, p_target) {
 
 }
 
+function getEntityIntent(p_entity) {
+
+    var intent;
+
+    if (p_entity.energy > ACTIONS_COSTS_MATE) {
+
+        intent = "mate";
+
+    } else {
+
+        intent = "kill";
+
+    }
+
+    return intent;
+
+}
+
+function getOperatorFromIntent(p_intent) {
+
+    var result;
+
+    function dislikeOperator(left, right) {
+
+        return (left <= right);
+
+    }
+
+    function likeOperator(left, right) {
+
+        return (left >= right);
+
+    }
+
+    if (p_intent === "kill") {
+
+        result = dislikeOperator;
+
+    } else if (p_intent === "mate") {
+
+        result = likeOperator;
+
+    }
+
+    return result;
+
+}
+
+function calcDeltaDistance(left, right) {
+
+    var x1 = left.x;
+    var y1 = left.y;
+
+    var x2 = right.x;
+    var y2 = right.y;
+
+    var a = Math.pow(x2 - x1, 2);
+    var b = Math.pow(y2 - y1, 2);
+
+    return Math.sqrt(a + b);
+
+}
+
+function getDistanceToEntitySorter(p_entity) {
+
+    function proto_distanceSort(left, right) {
+
+        var d_left = calcDeltaDistance(p_entity, left);
+        var d_right = calcDeltaDistance(p_entity, right)
+
+        return d_left - d_right;
+
+    }
+
+    return proto_distanceSort;
+
+}
+
+function findTarget(p_entity, p_targets) {
+
+    var current_target;
+    var like_factor;
+
+    var intent = getEntityIntent(p_entity);
+    var operator = getOperatorFromIntent(intent);
+
+    p_targets.sort(getDistanceToEntitySorter(p_entity))
+
+    var target = p_targets[0];
+    var current_factor = getLikeFactorForEntity(p_entity, target);
+
+    var i = 1;
+    var n = p_targets.length;
+
+    for (i; i < n; i += 1) {
+
+        current_target = p_targets[i];
+
+        like_factor = getLikeFactorForEntity(p_entity, current_target) * (1 / i);
+
+        if (operator(like_factor, current_factor)) {
+
+            current_factor = like_factor;
+
+            target = current_target
+
+        }
+
+    }
+
+    return target;
+
+}
+
+function getDirectionToTarget(p_entity, p_target) {
+
+    var x1 = p_entity.x;
+    var y1 = p_entity.y;
+
+    var x2 = p_target.x;
+    var y2 = p_target.y;
+
+    return Math.atan2(y2 - y1, x2 - x1);
+
+}
+
+function getCurrentHeading(p_entity, p_entities) {
+
+    p_entity.energy -= ACTIONS_COSTS_MOVE;
+
+    var target = findTarget(p_entity, p_entities);
+    var heading = getDirectionToTarget(p_entity, target);
+
+    return heading;
+
+}
+
 function attackEntity(p_entity, p_target) {
 
-    var vit = p_target.vitality;
+    var vit = p_target.energy;
     var str = p_entity.strength;
 
     var adjusted_vit = Math.max(0, Math.min(1, (vit - str)));
 
-    p_target.vit = adjusted_vit;
+    if (adjusted_vit <= 0) {
+
+        p_entity.entity += p_target.energy;
+
+    } else {
+
+        p_entity.energy -= ACTIONS_COSTS_KILL;
+
+    }
+
+    p_target.energy = adjusted_vit;
 
 }
 
@@ -220,24 +378,26 @@ function createEntity(p_genome) {
 
     var entity;
     var i;
+    var n;
     var trait_name;
+    var trait_names;
 
     entity = {};
 
     entity.x = 0;
     entity.y = 0;
-    entity.cooldown_counter = 0;
+    entity.energy = 0;
 
     entity.genome = p_genome;
 
+    trait_names = Object.keys(TRAITS);
+
     i = 0;
+    n = trait_names.length;
 
-    // This is allowed to go wrong. It's called mutation :P
-    for (trait_name in TRAITS) {
+    for (i; i < n; i += 1) {
 
-        entity[trait_name] = p_genome.sequence[i];
-
-        i += 1;
+        entity[trait_names[i]] = p_genome.sequence[i];
 
     }
 
@@ -330,13 +490,13 @@ function getEntities(amount) {
     )
 
     ropBotTestRunner(
-        "Entity has a speed trait between 0 (incl.) and 1 (excl.)",
+        "Entity has a stamina trait between 0 (incl.) and 1 (excl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isNumber(entity.speed)
-                && entity.speed >= 0
-                && entity.speed < 1);
+            return (isNumber(entity.stamina)
+                && entity.stamina >= 0
+                && entity.stamina < 1);
         }
     )
 
@@ -352,13 +512,13 @@ function getEntities(amount) {
     )
 
     ropBotTestRunner(
-        "Entity has a vitality trait between 0 (incl.) and 1 (excl.)",
+        "Entity has a energy trait between 0 (incl.) and 1 (excl.)",
         ropBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         () => {
-            return (isNumber(entity.vitality)
-                && entity.vitality >= 0
-                && entity.vitality < 1);
+            return (isNumber(entity.energy)
+                && entity.energy >= 0
+                && entity.energy < 1);
         }
     )
 

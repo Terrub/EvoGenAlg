@@ -53,28 +53,21 @@ var Renderer = (function contructRenderer() {
     var tics = 0;
 
     var proto_render = {};
-    var ACTIONS_COSTS_MATE = 80;
-    var ACTIONS_COSTS_KILL = 5;
-    var ACTIONS_COSTS_MOVE = 3;
-    var NEW_BORN_COOLDOWN = 40;
 
     var actions = {
         'mate': function (p_entity, p_target) {
 
             var offspring = spawnOffspringWithTarget(p_entity, p_target);
             var direction = getRandomDirection();
-
-            offspring.cooldown_counter = NEW_BORN_COOLDOWN;
+            var size = (offspring.size * 15) + 5;
 
             offspring.x = (p_entity.x + p_target.x) / 2;
             offspring.y = (p_entity.y + p_target.y) / 2;
 
-            offspring.x += (offspring.size * 20 * Math.random() * 2 * direction.x);
-            offspring.y += (offspring.size * 20 * Math.random() * 2 * direction.y);
+            offspring.x += (size * Math.random() * 2 * direction.x);
+            offspring.y += (size * Math.random() * 2 * direction.y);
 
             entities.push(offspring);
-
-            p_entity.cooldown_counter = ACTIONS_COSTS_MATE;
 
         },
 
@@ -82,18 +75,17 @@ var Renderer = (function contructRenderer() {
 
             attackEntity(p_entity, p_target);
 
-            p_entity.cooldown_counter = ACTIONS_COSTS_KILL;
-
         },
 
         'move': function (p_entity, p_target) {
 
-            var direction = getRandomDirection();
+            var heading = getCurrentHeading(p_entity, entities);
+            var direction = getDirectionFromHeading(heading);
+            var size = (p_entity.size * 15) + 5
+            var half_size = size / 2;
 
-            p_entity.x += direction.x * Math.random() * (p_entity.size * 10);
-            p_entity.y += direction.y * Math.random() * (p_entity.size * 10);
-
-            p_entity.cooldown_counter = ACTIONS_COSTS_MOVE;
+            p_entity.x += direction.x * Math.random() * half_size;
+            p_entity.y += direction.y * Math.random() * half_size;
 
         }
     }
@@ -126,14 +118,15 @@ var Renderer = (function contructRenderer() {
 
     function getRandomDirection() {
 
-        var heading;
-        var direction;
+        var heading = Math.random() * (Math.PI * 2);
 
-        heading = Math.random() * (Math.PI * 2);
+        return getDirectionFromHeading(heading);
 
-        direction = {x: Math.cos(heading), y: Math.sin(heading)};
+    }
 
-        return direction;
+    function getDirectionFromHeading(p_heading) {
+
+        return {x: Math.cos(p_heading), y: Math.sin(p_heading)};
 
     }
 
@@ -280,12 +273,6 @@ var Renderer = (function contructRenderer() {
 
             entity = p_entities[i];
 
-            if (isEntityBusy(entity)) {
-
-                continue;
-
-            }
-
             entity_targets = touching_entities[i];
 
             if (isDefined(entity_targets)) {
@@ -301,6 +288,8 @@ var Renderer = (function contructRenderer() {
                         "entity": entity,
                         "target": target
                     });
+
+                    break;
 
                 }
 
@@ -327,28 +316,28 @@ var Renderer = (function contructRenderer() {
         var action;
         var execution;
 
-        p_action_queue.sort(sortActionQueueOnEntitySpeed);
-
         while (p_action_queue.length > 0) {
 
             queue_slot = p_action_queue.pop();
 
             entity = queue_slot.entity;
 
-            if (!isEntityBusy(entity)) {
+            if (!isEntityAlive(entity)) {
 
-                target = queue_slot.target;
-                action = queue_slot.action;
+                continue;
 
-                if (isDefined(action)) {
+            }
 
-                    execution = actions[action];
+            target = queue_slot.target;
+            action = queue_slot.action;
 
-                    if (isDefined(execution)) {
+            if (isDefined(action)) {
 
-                        execution(entity, target);
+                execution = actions[action];
 
-                    }
+                if (isDefined(execution)) {
+
+                    execution(entity, target);
 
                 }
 
@@ -371,7 +360,7 @@ var Renderer = (function contructRenderer() {
         var width = WIDTH;
         var height = HEIGHT;
 
-        var size = (p_entity.size * 20);
+        var size = (p_entity.size * 15) + 5;
         var half_size = (size / 2);
 
         var cells = [];
@@ -430,12 +419,6 @@ var Renderer = (function contructRenderer() {
             addEntityToGrid(entity, p_grid, i);
 
         }
-
-    }
-
-    function sortActionQueueOnEntitySpeed(p_left_action, p_right_action) {
-
-        return p_left_action.entity.speed - p_right_action.entity.speed;
 
     }
 
@@ -518,7 +501,7 @@ var Renderer = (function contructRenderer() {
     // to entity class itself? Resolution is fixed due to units anyway.
     function drawEntity(entity) {
 
-        var size = (entity.size * 20);
+        var size = (entity.size * 15) + 5;
         var half_size = (size / 2);
 
         display.drawRect(

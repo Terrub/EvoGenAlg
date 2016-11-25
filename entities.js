@@ -160,7 +160,7 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 
 function updateCounters(p_entity) {
 
-    p_entity.energy += p_entity.stamina * 0.15;
+    p_entity.energy += p_entity.stamina * 0.5;
 
 }
 
@@ -241,7 +241,7 @@ function assessEntityIntent(p_entity, p_targets) {
     var highest_priority;
     var chosen_target;
 
-    var i = 1;
+    var i = 0;
     var n = p_targets.length;
 
     if (p_entity.aggression > Math.random()) {

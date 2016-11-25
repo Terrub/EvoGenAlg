@@ -575,7 +575,7 @@ var Renderer = (function contructRenderer() {
         getEntitiesIntentions(entities);
 
         queueEntityActionAttempts(entities, action_queue);
-report("action_queue:", action_queue.length);
+
         resolveActionQueue(action_queue);
 
         entities.map(isOutOfBounds);
@@ -654,11 +654,21 @@ report("action_queue:", action_queue.length);
 
         }
 
-        if (entities.length > 50000) {
+        if (entities.length > 3000) {
 
             stop();
 
-            console.log("Stopping. we're above our render limit!")
+            report("Stopping. we're above our render limit!");
+
+        }
+
+        if (entities.length < 2) {
+
+            stop();
+
+            report("Stopping. All pixies, but one, are dust...");
+
+            return;
 
         }
 

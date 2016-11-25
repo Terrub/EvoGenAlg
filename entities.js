@@ -12,23 +12,18 @@ var TRAITS = {
     "green": true,
     "blue": true,
     "like": true,
-    "dislike": true
+    "aggression": true
 };
+var TRAIT_NAMES = Object.keys(TRAITS);
+var NUM_TRAITS = TRAIT_NAMES.length;
 
-var NUM_TRAITS = Object.keys(TRAITS).length;
-
-var ACTIONS_COSTS_MATE = 5;
-var ACTIONS_COSTS_KILL = 0.5;
-var ACTIONS_COSTS_MOVE = 0.1;
-
-function generateRandomSequence(p_traits) {
+function generateRandomSequence() {
 
     var trait_name;
-
-    var trait_names = Object.keys(p_traits);
+    var trait_names = TRAIT_NAMES;
 
     var i = 0;
-    var n = trait_names.length;
+    var n = NUM_TRAITS;
 
     var sequence = [];
 
@@ -57,11 +52,11 @@ function generateRandomGenome() {
 function mutateEntity(p_entity) {
 
     var trait_name;
-    var trait_names = Object.keys(TRAITS);
+    var trait_names = TRAIT_NAMES;
     var mutation_offset;
 
     var i = 0;
-    var n = trait_names.length;
+    var n = NUM_TRAITS;
 
     var round = Math.round;
     var rand = Math.random;
@@ -100,29 +95,6 @@ function getEntityColor(p_entity) {
 
 }
 
-function getLikeFactorForEntity(p_entity, p_target) {
-
-    var trait;
-    var trait_name;
-
-    var trait_names = Object.keys(TRAITS);
-    var i = 0;
-    var n = trait_names.length;
-
-    var total = 0;
-
-    for ( i; i < n; i += 1 ) {
-
-        trait_name = trait_names[i];
-
-        total += p_target[trait_name] - p_entity[trait_name];
-
-    }
-
-    return total;
-
-}
-
 function isEntityAlive(p_entity) {
 
     return (p_entity.energy > 0);
@@ -136,15 +108,21 @@ function combineParentSequences(p_entity, p_target) {
     var right;
     var trait;
 
+    var round = Math.round;
+    var rand = Math.random;
+
     var sequence = [];
     var i = 0;
+    var n = NUM_TRAITS;
 
-    for (trait_name in TRAITS) {
+    for (i; i < n; i += 1) {
+
+        trait_name = TRAIT_NAMES[i];
 
         left = p_entity[trait_name];
         right = p_target[trait_name];
 
-        if (Math.round(Math.random()) === 1) {
+        if (round(rand()) === 1) {
 
             trait = left;
 
@@ -155,8 +133,6 @@ function combineParentSequences(p_entity, p_target) {
         }
 
         sequence[i] = trait;
-
-        i += 1;
 
     }
 
@@ -172,9 +148,6 @@ function spawnOffspringWithTarget(p_entity, p_target) {
     var trait_name;
     var host;
 
-    p_entity.energy -= ACTIONS_COSTS_MATE;
-    p_target.energy -= ACTIONS_COSTS_MATE;
-
     genome = {
         "sequence": combineParentSequences(p_entity, p_target)
     };
@@ -187,168 +160,128 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 
 function updateCounters(p_entity) {
 
-    p_entity.energy += p_entity.stamina;
+    p_entity.energy = Math.max(1, p_entity.energy + p_entity.stamina);
 
 }
 
-function getEntityActionForTouchingTarget(p_entity, p_target) {
+function getTraitSumFromEntity(p_entity) {
 
-    var like_factor = getLikeFactorForEntity(p_entity, p_target);
-    var action = "move";
+    var trait_name;
+    var i = 0;
+    var n = NUM_TRAITS;
+    var total = 0;
 
-    if (like_factor > (p_entity.like * NUM_TRAITS * 2) &&
-        p_entity.energy > ACTIONS_COSTS_MATE &&
-        p_target.energy > ACTIONS_COSTS_MATE) {
+    for ( i; i < n; i += 1 ) {
 
-        action = "mate";
+        trait_name = TRAIT_NAMES[i];
 
-    }
-
-    if (p_entity.dislike > Math.random() &&
-        p_entity.energy > ACTIONS_COSTS_KILL) {
-
-        action = "kill";
+        total += p_entity[trait_name];
 
     }
 
-    return action;
+    return total;
 
 }
 
-function getEntityIntent(p_entity) {
+function getKillPriority(p_entity, p_target) {
 
-    var intent;
+    var potential_gain = p_target.energy;
+    var distance = Renderer.calcDeltaDistance(p_entity, p_target);
 
-    if (p_entity.energy > ACTIONS_COSTS_MATE) {
+    var d_stamina = p_entity.stamina - p_target.stamina;
+    var travel_cost = distance / (d_stamina - Renderer.ACTIONS.move.cost);
+    var kill_cost = (p_entity.stamina - Renderer.ACTIONS.kill.cost) / p_target.energy;
 
-        intent = "mate";
+    var kill_priority = potential_gain / (travel_cost + kill_cost);
 
-    } else {
-
-        intent = "kill";
-
-    }
-
-    return intent;
+    return kill_priority;
 
 }
 
-function getOperatorFromIntent(p_intent) {
+function getLikeFactorOfTarget(p_entity, p_target) {
 
-    var result;
+    var trait;
+    var trait_name;
 
-    function dislikeOperator(left, right) {
+    var i = 0;
+    var n = NUM_TRAITS;
 
-        return (left <= right);
+    var total = 0;
+    var normalised_total;
 
-    }
+    var distance = Renderer.calcDeltaDistance(p_entity, p_target);
+    var d_stamina = p_entity.stamina - p_target.stamina;
+    var travel_cost = distance / (d_stamina - Renderer.ACTIONS.move.cost);
+    var breed_cost = Renderer.ACTIONS.mate.cost / p_entity.stamina;
 
-    function likeOperator(left, right) {
-
-        return (left >= right);
-
-    }
-
-    if (p_intent === "kill") {
-
-        result = dislikeOperator;
-
-    } else if (p_intent === "mate") {
-
-        result = likeOperator;
-
-    }
-
-    return result;
-
-}
-
-function calcDeltaDistance(left, right) {
-
-    var x1 = left.x;
-    var y1 = left.y;
-
-    var x2 = right.x;
-    var y2 = right.y;
-
-    var a = Math.pow(x2 - x1, 2);
-    var b = Math.pow(y2 - y1, 2);
-
-    return Math.sqrt(a + b);
-
-}
-
-function getDistanceToEntitySorter(p_entity) {
-
-    function proto_distanceSort(left, right) {
-
-        var d_left = calcDeltaDistance(p_entity, left);
-        var d_right = calcDeltaDistance(p_entity, right)
-
-        return d_left - d_right;
-
-    }
-
-    return proto_distanceSort;
-
-}
-
-function findTarget(p_entity, p_targets) {
-
-    var current_target;
     var like_factor;
 
-    var intent = getEntityIntent(p_entity);
-    var operator = getOperatorFromIntent(intent);
+    for ( i; i < n; i += 1 ) {
 
-    p_targets.sort(getDistanceToEntitySorter(p_entity))
+        trait_name = TRAIT_NAMES[i];
 
-    var target = p_targets[0];
-    var current_factor = getLikeFactorForEntity(p_entity, target);
+        total += p_target[trait_name] - p_entity[trait_name];
+
+    }
+
+    normalised_total = total / NUM_TRAITS;
+
+    like_factor = normalised_total / (travel_cost + breed_cost);
+
+    return normalised_total;
+
+}
+
+function assessEntityIntent(p_entity, p_targets) {
+
+    var intended_action;
+    var comparitor;
+    var target;
+    var priority;
+    var highest_priority;
+    var chosen_target;
 
     var i = 1;
     var n = p_targets.length;
 
+    if (p_entity.aggression > Math.random()) {
+
+        intended_action = Renderer.ACTIONS.kill;
+        comparitor = getKillPriority;
+
+    } else {
+
+        intended_action = Renderer.ACTIONS.mate
+        comparitor = getLikeFactorOfTarget;
+
+    }
+
     for (i; i < n; i += 1) {
 
-        current_target = p_targets[i];
+        if (p_entity.id === i) {
 
-        like_factor = getLikeFactorForEntity(p_entity, current_target) * (1 / i);
+            continue;
 
-        if (operator(like_factor, current_factor)) {
+        }
 
-            current_factor = like_factor;
+        target = p_targets[i];
 
-            target = current_target
+        priority = comparitor(p_entity, target);
+
+        if (isUndefined(chosen_target) || priority > highest_priority) {
+
+            highest_priority = priority;
+
+            chosen_target = target;
 
         }
 
     }
 
-    return target;
-
-}
-
-function getDirectionToTarget(p_entity, p_target) {
-
-    var x1 = p_entity.x;
-    var y1 = p_entity.y;
-
-    var x2 = p_target.x;
-    var y2 = p_target.y;
-
-    return Math.atan2(y2 - y1, x2 - x1);
-
-}
-
-function getCurrentHeading(p_entity, p_entities) {
-
-    p_entity.energy -= ACTIONS_COSTS_MOVE;
-
-    var target = findTarget(p_entity, p_entities);
-    var heading = getDirectionToTarget(p_entity, target);
-
-    return heading;
+    p_entity.intent = {
+        'action': intended_action,
+        'target': chosen_target
+    };
 
 }
 
@@ -362,10 +295,6 @@ function attackEntity(p_entity, p_target) {
     if (adjusted_vit <= 0) {
 
         p_entity.entity += p_target.energy;
-
-    } else {
-
-        p_entity.energy -= ACTIONS_COSTS_KILL;
 
     }
 
@@ -390,10 +319,10 @@ function createEntity(p_genome) {
 
     entity.genome = p_genome;
 
-    trait_names = Object.keys(TRAITS);
+    trait_names = TRAIT_NAMES;
 
     i = 0;
-    n = trait_names.length;
+    n = NUM_TRAITS;
 
     for (i; i < n; i += 1) {
 
@@ -418,6 +347,7 @@ function createEntity(p_genome) {
 function getEntities(amount) {
 
     var genome;
+    var entity;
 
     var i = 0;
     var n = amount;
@@ -427,7 +357,9 @@ function getEntities(amount) {
 
         genome = generateRandomGenome();
 
-        entities[i] = createEntity(genome);
+        entity = createEntity(genome);
+        entity.id = i;
+        entities[i] = entity;
 
     }
 

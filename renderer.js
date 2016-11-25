@@ -30,6 +30,26 @@
     -   I'd also like to be able to see how many entities are still active
         (I use a degenerate method now using the console: entities.length)
 
+
+    how about each entity invokes an attempt to call a functionname upon a target
+    resistance then comes in the form of not hving that functionname exactly or the
+    params no longer match.
+    we can attempt something as a try...catch block.
+    Failure means it just didn't work.
+    Also the actions that can be performed themselves are limited to the axioms that
+    we set for the this world.
+
+    An attack could then be considered by trying to substract a variable int off
+    of the target's energy/health/blood/lifeforce/whatever.
+    If the target's lifeforce is not the same type or not at the same location
+    as the attacker expects it to be, it would fail. The real interesting part
+    comes when conservation of energy is a factor. Imagine armour can be
+    described as an variable int that is subtracted from any attempted public
+    access to lifeforce. That number that is subtracted could've been points
+    spent on speed or size or something else. So a diversity would be able to
+    form of entities that are more focussed on defense at the expense of offense
+    or vice versa.
+
 */
 
 var Renderer = (function contructRenderer() {
@@ -49,44 +69,64 @@ var Renderer = (function contructRenderer() {
     var HEIGHT = (window.innerHeight / 2);
 
     var world_is_loaded = false;
-    var temp_time = getTime();
+
+    var old_time = getTime();
+    var current_time;
     var tics = 0;
 
     var proto_render = {};
 
-    var actions = {
-        'mate': function (p_entity, p_target) {
+    var ACTIONS = {
+        'mate': {
+            'cost': 0.8,
+            'execution': function (p_entity, p_target) {
 
-            var offspring = spawnOffspringWithTarget(p_entity, p_target);
-            var direction = getRandomDirection();
-            var size = (offspring.size * 15) + 5;
+                var offspring;
+                var size;
+                var heading;
+                var direction;
+                var offset;
 
-            offspring.x = (p_entity.x + p_target.x) / 2;
-            offspring.y = (p_entity.y + p_target.y) / 2;
+                p_target.energy -= ACTIONS.mate.cost;
 
-            offspring.x += (size * Math.random() * 2 * direction.x);
-            offspring.y += (size * Math.random() * 2 * direction.y);
+                offspring = spawnOffspringWithTarget(p_entity, p_target);
+                size = (offspring.size * 15) + 5;
 
-            entities.push(offspring);
+                offspring.x = (p_entity.x + p_target.x) / 2;
+                offspring.y = (p_entity.y + p_target.y) / 2;
 
+                heading = getHeadingToTarget(p_entity, p_target);
+                direction = getDirectionFromHeading(heading + (Math.PI / 2));
+
+                offset = Math.max(p_entity.size, p_target.size) + size + 1;
+
+                offspring.x += (direction.x * offset);
+                offspring.y += (direction.y * offset);
+
+                entities.push(offspring);
+
+            }
         },
 
-        'kill': function (p_entity, p_target) {
+        'kill': {
+            'cost': 0.5,
+            'execution': function (p_entity, p_target) {
 
-            attackEntity(p_entity, p_target);
+                attackEntity(p_entity, p_target);
 
+            }
         },
 
-        'move': function (p_entity, p_target) {
+        'move': {
+            'cost': 0.1,
+            'execution': function (p_entity, p_target) {
 
-            var heading = getCurrentHeading(p_entity, entities);
-            var direction = getDirectionFromHeading(heading);
-            var size = (p_entity.size * 15) + 5
-            var half_size = size / 2;
+                var heading = getHeadingToTarget(p_entity, p_target);
+                var direction = getDirectionFromHeading(heading);
 
-            p_entity.x += direction.x * Math.random() * half_size;
-            p_entity.y += direction.y * Math.random() * half_size;
+                moveEntity(p_entity, direction);
 
+            }
         }
     }
 
@@ -116,17 +156,28 @@ var Renderer = (function contructRenderer() {
 
     // ----
 
+    function getRandomHeading() {
+
+        return Math.random() * (Math.PI * 2);
+
+    }
+
     function getRandomDirection() {
 
-        var heading = Math.random() * (Math.PI * 2);
-
-        return getDirectionFromHeading(heading);
+        return getDirectionFromHeading(getRandomHeading());
 
     }
 
     function getDirectionFromHeading(p_heading) {
 
         return {x: Math.cos(p_heading), y: Math.sin(p_heading)};
+
+    }
+
+    function moveEntity(p_entity, p_direction) {
+
+        p_entity.x += p_direction.x;
+        p_entity.y += p_direction.y;
 
     }
 
@@ -139,12 +190,13 @@ var Renderer = (function contructRenderer() {
         var i = 0;
         var n = p_entities.length;
 
-        for ( i; i < n; i += 1 ) {
+        for (i; i < n; i += 1) {
 
             entity = p_entities[i];
 
             if (isEntityAlive(entity)) {
 
+                entity.id = entities.length;
                 entities.push(entity);
 
             }
@@ -162,11 +214,28 @@ var Renderer = (function contructRenderer() {
         var i = 0;
         var n = p_entities.length;
 
-        for ( i; i < n; i += 1 ) {
+        for (i; i < n; i += 1) {
 
             entity = p_entities[i];
 
             updateCounters(entity);
+
+        }
+
+    }
+
+    function getEntitiesIntentions(p_entities) {
+
+        var entity;
+
+        var i = 0;
+        var n = p_entities.length;
+
+        for (i; i < n; i += 1) {
+
+            entity = p_entities[i];
+
+            assessEntityIntent(entity, p_entities);
 
         }
 
@@ -256,13 +325,10 @@ var Renderer = (function contructRenderer() {
 
     function queueEntityActionAttempts(p_entities, p_action_queue) {
 
-        var entity_id;
-        var entity_targets;
-        var target_id;
-
         var entity;
-        var target;
+        var intent;
         var action;
+        var melee_range_entities;
 
         var touching_entities = getTouchingEntities(p_entities);
 
@@ -272,35 +338,36 @@ var Renderer = (function contructRenderer() {
         for (i; i < n; i += 1) {
 
             entity = p_entities[i];
+            intent = entity.intent;
+            action = intent.action;
+            melee_range_entities = touching_entities[i];
 
-            entity_targets = touching_entities[i];
+            // Is target in range?
+            if (isDefined(melee_range_entities) &&
+                melee_range_entities[entity.intent.target.id]) {
+                // if so, resolve intent.
 
-            if (isDefined(entity_targets)) {
-
-                for (target_id in entity_targets) {
-
-                    target = p_entities[target_id];
-
-                    action = getEntityActionForTouchingTarget(entity, target);
+                if (action.cost < entity.energy) {
 
                     p_action_queue.push({
-                        "action": action,
+                        "action": entity.intent.action,
                         "entity": entity,
-                        "target": target
+                        "target": entity.intent.target
                     });
-
-                    break;
 
                 }
 
             } else {
 
-                action = "move";
+                if (ACTIONS.move.cost < entity.energy) {
 
-                p_action_queue.push({
-                    "action": action,
-                    "entity": entity
-                });
+                    p_action_queue.push({
+                        "action": ACTIONS.move,
+                        "entity": entity,
+                        "target": entity.intent.target
+                    });
+
+                }
 
             }
 
@@ -333,11 +400,11 @@ var Renderer = (function contructRenderer() {
 
             if (isDefined(action)) {
 
-                execution = actions[action];
+                if (entity.energy - action.cost > 0) {
 
-                if (isDefined(execution)) {
+                    action.execution(entity, target);
 
-                    execution(entity, target);
+                    entity.energy -= action.cost;
 
                 }
 
@@ -422,13 +489,40 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function isOutOfBounds(entity) {
+    function isOutOfBounds(p_entity) {
 
-        if (entity.x < 0) { entity.x += WIDTH; }
-        if (entity.y < 0) { entity.y += HEIGHT; }
+        if (p_entity.x < 0) { p_entity.x += WIDTH; }
+        if (p_entity.y < 0) { p_entity.y += HEIGHT; }
 
-        if (entity.x > WIDTH) { entity.x -= WIDTH; }
-        if (entity.y > HEIGHT) { entity.y -= HEIGHT; }
+        if (p_entity.x > WIDTH) { p_entity.x -= WIDTH; }
+        if (p_entity.y > HEIGHT) { p_entity.y -= HEIGHT; }
+
+    }
+
+    function getHeadingToTarget(p_entity, p_target) {
+
+        var x1 = p_entity.x;
+        var y1 = p_entity.y;
+
+        var x2 = p_target.x;
+        var y2 = p_target.y;
+
+        return Math.atan2(y2 - y1, x2 - x1);
+
+    }
+
+    function calcDeltaDistance(left, right) {
+
+        var x1 = left.x;
+        var y1 = left.y;
+
+        var x2 = right.x;
+        var y2 = right.y;
+
+        var a = Math.pow(x2 - x1, 2);
+        var b = Math.pow(y2 - y1, 2);
+
+        return Math.sqrt(a + b);
 
     }
 
@@ -441,13 +535,10 @@ var Renderer = (function contructRenderer() {
         var is_mutating;
         var entity;
 
-        var i;
-        var n;
+        var i = 0;
+        var n = p_entities.length;
 
-        i = 0;
-        n = p_entities.length;
-
-        for (i; i < n; i += 1){
+        for (i; i < n; i += 1) {
 
             entity = p_entities[i];
 
@@ -476,8 +567,10 @@ var Renderer = (function contructRenderer() {
 
         updateEntityCounters(entities);
 
-        queueEntityActionAttempts(entities, action_queue);
+        getEntitiesIntentions(entities);
 
+        queueEntityActionAttempts(entities, action_queue);
+report("action_queue:", action_queue.length);
         resolveActionQueue(action_queue);
 
         entities.map(isOutOfBounds);
@@ -528,7 +621,33 @@ var Renderer = (function contructRenderer() {
 
     }
 
+    function updateUserInterface() {
+
+        tics += 1;
+
+        current_time = getTime();
+
+        if (old_time + 1000 < current_time) {
+
+            old_time = current_time;
+
+            document.querySelector('[name="frame_rate"]').innerHTML = tics;
+
+            tics = 0;
+
+        }
+
+        document.querySelector('[name="entity_count"]').value = entities.length;
+
+    }
+
     function tic() {
+
+        if (!world_is_loaded) {
+
+            return;
+
+        }
 
         if (entities.length > 50000) {
 
@@ -538,23 +657,11 @@ var Renderer = (function contructRenderer() {
 
         }
 
-        tics += 1;
-
         updateValues();
 
         updateDisplay();
 
-        if (temp_time + 1000 < getTime()) {
-
-            temp_time = getTime();
-
-            document.querySelector('[name="frame_rate"]').innerHTML = tics;
-
-            tics = 0;
-
-        }
-
-        document.querySelector('[name="entity_count"]').value = entities.length;
+        updateUserInterface();
 
         if (animating === true) {
 
@@ -603,7 +710,7 @@ var Renderer = (function contructRenderer() {
 
         animating = true;
 
-        temp_time = 0;
+        old_time = getTime();
         tics = 0;
 
         tic();
@@ -624,9 +731,8 @@ var Renderer = (function contructRenderer() {
 
         document.querySelector('[name="entity_count"]').value = "100";
 
-        entities = [];
-
         drawBackground();
+
     }
 
     ///////////
@@ -639,6 +745,9 @@ var Renderer = (function contructRenderer() {
     proto_render.start = start;
     proto_render.stop = stop;
     proto_render.reset = reset;
+    proto_render.getHeadingToTarget = getHeadingToTarget;
+    proto_render.calcDeltaDistance = calcDeltaDistance;
+    proto_render.ACTIONS = ACTIONS;
 
     return proto_render;
 

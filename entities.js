@@ -228,7 +228,7 @@ function getLikeFactorOfTarget(p_entity, p_target) {
 
     like_factor = normalised_total / (travel_cost + breed_cost);
 
-    return normalised_total;
+    return like_factor;
 
 }
 

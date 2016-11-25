@@ -78,7 +78,7 @@ var Renderer = (function contructRenderer() {
 
     var ACTIONS = {
         'mate': {
-            'cost': 0.8,
+            'cost': 5,
             'execution': function (p_entity, p_target) {
 
                 var offspring;
@@ -114,7 +114,7 @@ var Renderer = (function contructRenderer() {
         },
 
         'kill': {
-            'cost': 0.5,
+            'cost': 5,
             'execution': function (p_entity, p_target) {
 
                 attackEntity(p_entity, p_target);
@@ -123,7 +123,7 @@ var Renderer = (function contructRenderer() {
         },
 
         'move': {
-            'cost': 0.1,
+            'cost': 1,
             'execution': function (p_entity, p_target) {
 
                 var heading = getHeadingToTarget(p_entity, p_target);

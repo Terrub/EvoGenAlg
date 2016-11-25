@@ -83,6 +83,8 @@ var Renderer = (function contructRenderer() {
 
                 var offspring;
                 var size;
+                var left_size;
+                var right_size;
                 var heading;
                 var direction;
                 var offset;
@@ -98,7 +100,10 @@ var Renderer = (function contructRenderer() {
                 heading = getHeadingToTarget(p_entity, p_target);
                 direction = getDirectionFromHeading(heading + (Math.PI / 2));
 
-                offset = Math.max(p_entity.size, p_target.size) + size + 1;
+                left_size = (p_entity.size * 15) + 5;
+                right_size = (p_target.size * 15) + 5
+
+                offset = Math.max(left_size,right_size) + size;
 
                 offspring.x += (direction.x * offset);
                 offspring.y += (direction.y * offset);

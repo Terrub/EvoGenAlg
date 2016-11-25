@@ -160,7 +160,7 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 
 function updateCounters(p_entity) {
 
-    p_entity.energy = Math.max(1, p_entity.energy + p_entity.stamina);
+    p_entity.energy += p_entity.stamina * 0.15;
 
 }
 

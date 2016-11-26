@@ -4,6 +4,8 @@
 //  NOTES:
 /*
 
+    The display should just be a wrapper and interface for the canvas 2d context
+    for now. But I'd like to be able to use different displays.
 
 */
 

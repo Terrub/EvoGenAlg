@@ -9,10 +9,10 @@
 
 "use strict";
 
-var Renderer;
+var Rules;
 
-function define_Renderer() {
+function define_Rules() {
 
 }
 
-Renderer = define_Renderer();
+Rules = define_Rules();

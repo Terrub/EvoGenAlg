@@ -208,7 +208,7 @@ var marker = (function define_marker() {
 
 // --------
 
-var formatise = ( function ConstructFormatise() {
+var Formatise = ( function define_Formatise() {
 
     "use strict";
 
@@ -361,7 +361,7 @@ var formatise = ( function ConstructFormatise() {
 
 }() );
 
-var ropBotTestRunner = ( function ropBotTestRunnerConstructor() {
+var RopBotTestRunner = ( function define_RopBotTestRunner() {
 
     "use strict";
 

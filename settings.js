@@ -91,10 +91,64 @@ function define_Settings() {
 
     };
 
+    function runTests() {
+
+        RopBotTestRunner(
+            "Settings is defined",
+            RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+            true,
+            function() {
+
+                return isDefined(Settings);
+
+            }
+        );
+
+        RopBotTestRunner(
+            "Settings can create a new instance",
+            RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+            true,
+            function() {
+
+                var settings = Settings.createSettings();
+
+                return isDefined(settings);
+
+            }
+        );
+
+        RopBotTestRunner(
+            "Settings can create a new instance based on previous settings object",
+            RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+            true,
+            function() {
+
+                var settings_obj = {
+                    "display constructor": function construct_canvas() {},
+                    "display width": 101,
+                    "display height": 102
+                };
+
+                var settings = Settings.createSettings(settings_obj);
+
+                return (
+                    settings["display width"] === 101 &&
+                    settings["display height"] === 102 &&
+                    isFunction(settings["display constructor"])
+                );
+
+            }
+        );
+
+    }
+
+//------------------------------------------------------------------------------
+
     addDefaultSetting("display constructor", construct_canvas);
     addDefaultSetting("display width", 800);
     addDefaultSetting("display height", 600);
 
+    proto_settings.runTests = runTests;
     proto_settings.createSettings = createSettings;
 
     return proto_settings;
@@ -102,63 +156,3 @@ function define_Settings() {
 }
 
 Settings = define_Settings();
-
-//------------------------------------------------------------------------------
-
-// RopBotTestRunner(
-//     statement,
-//     assertion,
-//     expectation,
-//     experiment
-// )
-
-(function runTests() {
-
-    RopBotTestRunner(
-        "Settings is defined",
-        RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
-        true,
-        function() {
-
-            return isDefined(Settings);
-
-        }
-    );
-
-    RopBotTestRunner(
-        "Settings can create a new instance",
-        RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
-        true,
-        function() {
-
-            var settings = Settings.createSettings();
-
-            return isDefined(settings);
-
-        }
-    );
-
-    RopBotTestRunner(
-        "Settings can create a new instance based on previous settings object",
-        RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
-        true,
-        function() {
-
-            var settings_obj = {
-                "display constructor": function construct_canvas() {},
-                "display width": 101,
-                "display height": 102
-            };
-
-            var settings = Settings.createSettings(settings_obj);
-
-            return (
-                settings["display width"] === 101 &&
-                settings["display height"] === 102 &&
-                isFunction(settings["display constructor"])
-            );
-
-        }
-    );
-
-}())

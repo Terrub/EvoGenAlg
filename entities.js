@@ -13,14 +13,22 @@ var Entities;
 
 function define_Entities() {
 
+    var proto_entities;
+
+    function runTests() {
+
+
+
+    }
+
+//------------------------------------------------------------------------------
+
+    proto_entities = {};
+
+    proto_entities.runTests = runTests;
+
+    return proto_entities;
+
 }
 
 Entities = define_Entities();
-
-// RopBotTestRunner(p_statement, p_assertion, p_expectation, p_experiment)
-
-(function runTests() {
-
-
-
-}())

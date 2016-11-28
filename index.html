@@ -28,9 +28,21 @@
         <script>
             "use strict";
 
+            //*
+
+            Display.runTests();
+            Settings.runTests();
+            Renderer.runTests();
+            Entities.runTests();
+            Rules.runTests();
+
+            //*/
+
             // default settings
             var settings = Settings.createSettings();
             var renderer = Renderer.createRenderer(settings);
+
+
         </script>
     </body>
 </html>

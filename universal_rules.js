@@ -22,14 +22,22 @@ var Rules;
 
 function define_Rules() {
 
+    var proto_rules;
+
+    function runTests() {
+
+
+
+    }
+
+//------------------------------------------------------------------------------
+
+    proto_rules = {};
+
+    proto_rules.runTests = runTests;
+
+    return proto_rules;
+
 }
 
 Rules = define_Rules();
-
-// RopBotTestRunner(p_statement, p_assertion, p_expectation, p_experiment)
-
-(function runTests() {
-
-
-
-}())

@@ -26,31 +26,34 @@ function define_Settings() {
 
     var proto_settings = {};
 
-    var SETTINGS_KEYS = [
-        "display constructor",
-        "display width",
-        "display height"
-    ];
+    var SETTINGS_KEYS = [];
 
-    proto_settings.createSettings = function(p_settings_obj) {
+    var default_settings = {};
 
-        var settings = {};
+    function addDefaultSetting(key, value) {
+
+        default_settings[key] = value;
+
+        SETTINGS_KEYS.push(key);
+
+    }
+
+    function construct_canvas() {
+
+        var canvas = document.createElement("canvas");
+
+        document.body.appendChild(canvas);
+
+        return canvas;
+
+    }
+
+    function imbueSettingsObjectWith(p_settings, p_settings_obj) {
+
         var settings_key;
-        var seting;
+        var setting;
         var i;
         var n;
-
-        settings["display constructor"] = function construct_canvas() {
-
-            var canvas = document.createElement("canvas");
-
-            document.body.appendChild(canvas);
-
-            return canvas;
-
-        };
-        settings["display width"] = 800;
-        settings["display height"] = 600;
 
         i = 0;
         n = SETTINGS_KEYS.length;
@@ -63,15 +66,36 @@ function define_Settings() {
 
             if (isDefined(setting)) {
 
-                settings[settings_key] = setting;
+                p_settings[settings_key] = setting;
 
             }
 
         }
 
+    }
+
+    function createSettings(p_settings_obj) {
+
+        var settings = {};
+        var settings_obj = default_settings;
+
+        if (isDefined(p_settings_obj)) {
+
+            settings_obj = p_settings_obj;
+
+        }
+
+        imbueSettingsObjectWith(settings, settings_obj);
+
         return settings;
 
     };
+
+    addDefaultSetting("display constructor", construct_canvas);
+    addDefaultSetting("display width", 800);
+    addDefaultSetting("display height", 600);
+
+    proto_settings.createSettings = createSettings;
 
     return proto_settings;
 
@@ -120,12 +144,8 @@ Settings = define_Settings();
         true,
         function() {
 
-            var does_this_get_called = false;
-
             var settings_obj = {
-                "display constructor": function construct_canvas() {
-                    does_this_get_called = true;
-                },
+                "display constructor": function construct_canvas() {},
                 "display width": 101,
                 "display height": 102
             };

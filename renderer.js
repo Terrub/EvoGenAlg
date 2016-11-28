@@ -47,10 +47,53 @@ function define_Renderer() {
 
 Renderer = define_Renderer();
 
-// RopBotTestRunner(p_statement, p_assertion, p_expectation, p_experiment)
+//------------------------------------------------------------------------------
+
+// RopBotTestRunner(
+//     statement,
+//     assertion,
+//     expectation,
+//     experiment
+// )
 
 (function runTests() {
 
+    RopBotTestRunner(
+        "Renderer is defined",
+        RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        function() {
 
+            return isDefined(Renderer);
+
+        }
+    );
+
+    RopBotTestRunner(
+        "Renderer can create a new instance with a settings object",
+        RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        function() {
+
+            var display_constructor_called = false;
+
+            var mock_settings = {
+                "display constructor": function() {
+
+                    display_constructor_called = true;
+
+                    return {
+                        "getContext": function() {}
+                    };
+
+                }
+            }
+
+            var renderer = Renderer.createRenderer(mock_settings);
+
+            return display_constructor_called;
+
+        }
+    );
 
 }())

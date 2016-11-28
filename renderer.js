@@ -43,6 +43,26 @@ var Renderer;
 
 function define_Renderer() {
 
+    var proto_renderer = {};
+
+    proto_renderer.createRenderer = function(p_settings) {
+
+        var renderer = {};
+        var canvas = p_settings["display constructor"]();
+
+        canvas.width = p_settings["display width"];
+        canvas.height = p_settings["display height"];
+
+        canvas.name = "main_display";
+
+        renderer.display = Display.createDisplay(canvas);
+
+        return renderer;
+
+    }
+
+    return proto_renderer;
+
 }
 
 Renderer = define_Renderer();

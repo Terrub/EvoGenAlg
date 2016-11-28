@@ -48,14 +48,19 @@ function define_Renderer() {
     proto_renderer.createRenderer = function(p_settings) {
 
         var renderer = {};
-        var canvas = p_settings["display constructor"]();
+        var canvas;
 
-        canvas.width = p_settings["display width"];
-        canvas.height = p_settings["display height"];
+        if (isDefined(p_settings)) {
 
-        canvas.name = "main_display";
+            canvas = p_settings["display constructor"]();
+            canvas.width = p_settings["display width"];
+            canvas.height = p_settings["display height"];
 
-        renderer.display = Display.createDisplay(canvas);
+            canvas.name = "main_display";
+
+            renderer.display = Display.createDisplay(canvas);
+
+        }
 
         return renderer;
 
@@ -90,23 +95,35 @@ Renderer = define_Renderer();
     );
 
     RopBotTestRunner(
+        "Renderer can create a new instance",
+        RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
+        true,
+        function() {
+
+            var renderer = Renderer.createRenderer();
+
+            return isDefined(renderer);
+
+        }
+    );
+
+    RopBotTestRunner(
         "Renderer can create a new instance with a settings object",
         RopBotTestRunner.RESULT_EXACTLY_MATCHES_EXPECTATION,
         true,
         function() {
 
             var display_constructor_called = false;
+            var mock_settings = {};
 
-            var mock_settings = {
-                "display constructor": function() {
+            mock_settings["display constructor"] = function() {
 
-                    display_constructor_called = true;
+                display_constructor_called = true;
 
-                    return {
-                        "getContext": function() {}
-                    };
+                return {
+                    "getContext": function() {}
+                };
 
-                }
             }
 
             var renderer = Renderer.createRenderer(mock_settings);

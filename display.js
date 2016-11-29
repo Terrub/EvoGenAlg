@@ -33,6 +33,15 @@ function getDisplay(p_width, p_height) {
 
     }
 
+    display.drawCircle = function(x, y, r, color) {
+
+        glib.fillStyle = color;
+        glib.beginPath();
+        glib.arc(x, y, r, 0, 2 * Math.PI);
+        glib.fill();
+
+    }
+
     display.fill = function(color) {
 
         glib.fillStyle = color;

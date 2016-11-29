@@ -774,7 +774,6 @@ var Renderer = (function contructRenderer() {
 
         updateUserInterface();
 
-        checkForActionCostAdjustments();
         // checkForActionCostAdjustments();
 
         if (animating === true) {

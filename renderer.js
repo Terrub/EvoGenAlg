@@ -659,19 +659,15 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    //#REFACTOR: How do I merge this with the logic in 'addEntitiesToGrid'
-    // I'm doing unit occupation calculations in two places. Perhaps move it
-    // to entity class itself? Resolution is fixed due to units anyway.
     function drawEntity(entity) {
 
         var size = (entity.size * 15) + 5;
         var half_size = (size / 2);
 
-        display.drawRect(
-            entity.x - half_size,
-            entity.y - half_size,
-            size,
-            size,
+        display.drawCircle(
+            entity.x,
+            entity.y,
+            half_size,
             entity.color
         )
 
@@ -779,6 +775,7 @@ var Renderer = (function contructRenderer() {
         updateUserInterface();
 
         checkForActionCostAdjustments();
+        // checkForActionCostAdjustments();
 
         if (animating === true) {
 

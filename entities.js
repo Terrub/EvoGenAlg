@@ -300,11 +300,11 @@ function attackEntity(p_entity, p_target) {
 
     if (adjusted_vit <= 0) {
 
-        p_entity.entity += p_target.energy;
+        p_entity.energy += p_target.energy;
+
+        killEntity(p_target);
 
     }
-
-    killEntity(p_target);
 
 }
 

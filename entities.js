@@ -160,7 +160,7 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 
 function updateCounters(p_entity) {
 
-    p_entity.energy += p_entity.stamina * 0.5;
+    p_entity.energy += p_entity.stamina;
 
 }
 
@@ -285,6 +285,12 @@ function assessEntityIntent(p_entity, p_targets) {
 
 }
 
+function killEntity(p_entity) {
+
+    p_entity.energy = 0;
+
+}
+
 function attackEntity(p_entity, p_target) {
 
     var vit = p_target.energy;
@@ -298,7 +304,7 @@ function attackEntity(p_entity, p_target) {
 
     }
 
-    p_target.energy = adjusted_vit;
+    killEntity(p_target);
 
 }
 
@@ -315,7 +321,6 @@ function createEntity(p_genome) {
 
     entity.x = 0;
     entity.y = 0;
-    entity.energy = 0;
 
     entity.genome = p_genome;
 

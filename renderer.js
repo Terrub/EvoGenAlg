@@ -76,9 +76,14 @@ var Renderer = (function contructRenderer() {
 
     var proto_render = {};
 
+    var current_resolution = 0.1;
+    var adjustment_direction = 0;
+    var occurance = 0;
+    var occurance_threshold = 3;
+
     var ACTIONS = {
         'mate': {
-            'cost': 5,
+            'cost': 8,
             'execution': function (p_entity, p_target) {
 
                 var offspring;
@@ -107,6 +112,12 @@ var Renderer = (function contructRenderer() {
 
                 offspring.x += (direction.x * offset);
                 offspring.y += (direction.y * offset);
+
+                if (isEntityBurried(offspring)) {
+
+                    killEntity(offspring);
+
+                }
 
                 entities.push(offspring);
 
@@ -457,11 +468,51 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function addEntityToGrid(p_entity, p_grid, p_entity_index) {
+    function isEntityBurried(p_entity) {
 
+        var cells = getCellsFromEntity(p_entity);
         var cell;
 
+        var i = 0;
+        var n = cells.length;
+
+        for (i; i < n; i += 1) {
+
+            cell = cells[i];
+
+            if (!Grid.isOccupied(grid, cell.x, cell.y)) {
+
+                return false;
+
+            }
+
+        }
+
+        return true;
+
+    }
+
+    function addCellsToGrid(p_cells, p_grid, p_id) {
+
+        var i = 0;
+        var n = p_cells.length;
+        var cell;
+
+        for (i; i < n; i += 1) {
+
+            cell = p_cells[i];
+
+            Grid.addOccupant(p_grid, cell.x, cell.y, p_id);
+
+        }
+
+    }
+
+    function addEntityToGrid(p_entity, p_grid, p_entity_index) {
+
         var entity_cells = getCellsFromEntity(p_entity);
+        var found_space = false;
+        var cell;
 
         var i = 0;
         var n = entity_cells.length;
@@ -470,7 +521,21 @@ var Renderer = (function contructRenderer() {
 
             cell = entity_cells[i];
 
-            Grid.addOccupant(p_grid, cell.x, cell.y, p_entity_index);
+            if (!Grid.isOccupied(p_grid, cell.x, cell.y)) {
+
+                found_space = true;
+
+            }
+
+        }
+
+        if (found_space) {
+
+            addCellsToGrid(entity_cells, p_grid, p_entity_index);
+
+        } else {
+
+            killEntity(p_entity);
 
         }
 
@@ -568,9 +633,11 @@ var Renderer = (function contructRenderer() {
 
         Grid.reset(grid);
 
-        addEntitiesToGrid(entities, grid);
+        entities.map(isOutOfBounds);
 
         updateEntityCounters(entities);
+
+        addEntitiesToGrid(entities, grid);
 
         getEntitiesIntentions(entities);
 
@@ -578,11 +645,9 @@ var Renderer = (function contructRenderer() {
 
         resolveActionQueue(action_queue);
 
-        entities.map(isOutOfBounds);
+        mutateEntities(entities);
 
         entities = getLivingEntities(entities);
-
-        mutateEntities(entities);
 
     }
 
@@ -646,27 +711,62 @@ var Renderer = (function contructRenderer() {
 
     }
 
-    function tic() {
+    function checkForActionCostAdjustments() {
 
-        if (!world_is_loaded) {
+        var direction_changed;
+        var limit_reached;
 
-            return;
-
-        }
-
-        if (entities.length > 3000) {
-
-            stop();
+        if (entities.length > 1000) {
 
             report("Stopping. we're above our render limit!");
+
+            direction_changed = adjustment_direction !== 1;
+
+            adjustment_direction = 1;
+
+            limit_reached = true;
 
         }
 
         if (entities.length < 2) {
 
-            stop();
+            report("Stopping with one pixie left:", entities[0]);
 
-            report("Stopping. All pixies, but one, are dust...");
+            direction_changed = adjustment_direction !== -1;
+
+            adjustment_direction = -1;
+
+            limit_reached = true;
+
+        }
+
+        if (limit_reached) {
+
+            if (direction_changed) {
+
+                current_resolution *= 0.5;
+
+                occurance = 0;
+
+            } else {
+
+                occurance += 1;
+
+            }
+
+            ACTIONS.mate.cost += current_resolution * adjustment_direction;
+
+            reset();
+
+            start();
+
+        }
+
+    }
+
+    function tic() {
+
+        if (!world_is_loaded) {
 
             return;
 
@@ -677,6 +777,8 @@ var Renderer = (function contructRenderer() {
         updateDisplay();
 
         updateUserInterface();
+
+        checkForActionCostAdjustments();
 
         if (animating === true) {
 
@@ -722,6 +824,8 @@ var Renderer = (function contructRenderer() {
             loadWorld();
 
         }
+
+        report("Starting new world with settings:", ACTIONS.mate.cost, ACTIONS);
 
         animating = true;
 

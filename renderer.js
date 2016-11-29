@@ -83,7 +83,7 @@ var Renderer = (function contructRenderer() {
 
     var ACTIONS = {
         'mate': {
-            'cost': 8,
+            'cost': 5,
             'execution': function (p_entity, p_target) {
 
                 var offspring;

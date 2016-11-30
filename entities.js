@@ -60,6 +60,7 @@ function mutateEntity(p_entity) {
 
     var round = Math.round;
     var rand = Math.random;
+    var max = Math.max;
 
     for (i; i < n; i += 1) {
 
@@ -77,7 +78,7 @@ function mutateEntity(p_entity) {
 
             }
 
-            p_entity[trait_name] += mutation_offset;
+            p_entity[trait_name] = max(0, p_entity[trait_name] + mutation_offset);
 
         }
 
@@ -160,7 +161,12 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 
 function updateCounters(p_entity) {
 
-    p_entity.energy += p_entity.stamina;
+    if (p_entity.size - 0.01 > 0) {
+
+        p_entity.energy += 1;
+        p_entity.size -= 0.0005;
+
+    }
 
 }
 
@@ -185,14 +191,10 @@ function getTraitSumFromEntity(p_entity) {
 
 function getKillPriority(p_entity, p_target) {
 
-    var potential_gain = p_target.energy;
+    var potential_gain = p_target.size;
     var distance = Renderer.calcDeltaDistance(p_entity, p_target);
 
-    var d_stamina = p_entity.stamina - p_target.stamina;
-    var travel_cost = distance / (d_stamina - Renderer.ACTIONS.move.cost);
-    var kill_cost = (p_entity.stamina - Renderer.ACTIONS.kill.cost) / p_target.energy;
-
-    var kill_priority = potential_gain / (travel_cost + kill_cost);
+    var kill_priority = potential_gain / distance;
 
     return kill_priority;
 
@@ -244,14 +246,14 @@ function assessEntityIntent(p_entity, p_targets) {
     var i = 0;
     var n = p_targets.length;
 
-    if (p_entity.aggression > Math.random()) {
+    if (p_entity.energy < Renderer.ACTIONS.mate.cost) {
 
-        intended_action = Renderer.ACTIONS.kill;
+        intended_action = 'kill';
         comparitor = getKillPriority;
 
     } else {
 
-        intended_action = Renderer.ACTIONS.mate
+        intended_action = 'mate'
         comparitor = getLikeFactorOfTarget;
 
     }
@@ -295,16 +297,19 @@ function attackEntity(p_entity, p_target) {
 
     var vit = p_target.energy;
     var str = p_entity.strength;
+    var size = p_entity.size;
 
-    var adjusted_vit = Math.max(0, Math.min(1, (vit - str)));
+    var adjusted_vit = Math.max(0, Math.min(1, (vit - (str + size))));
 
     if (adjusted_vit <= 0) {
 
-        p_entity.energy += p_target.energy;
+        p_entity.size += p_target.size;
 
         killEntity(p_target);
 
     }
+
+    p_target.energy = adjusted_vit;
 
 }
 
@@ -335,6 +340,7 @@ function createEntity(p_genome) {
 
     }
 
+    //#TODO: move this to the renderer please... CMON... ><
     Object.defineProperty(entity, 'color', {
         'get': function () {
 

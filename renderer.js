@@ -703,7 +703,7 @@ var Renderer = (function contructRenderer() {
 
         }
 
-        report("Starting new world with settings:", ACTIONS.mate.cost, ACTIONS);
+        report("Starting new world with settings:", ACTIONS);
 
         animating = true;
 

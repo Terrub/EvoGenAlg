@@ -299,17 +299,12 @@ function attackEntity(p_entity, p_target) {
     var str = p_entity.strength;
     var size = p_entity.size;
 
-    var adjusted_vit = Math.max(0, Math.min(1, (vit - (str + size))));
+    var adjusted_vit = Math.max(0, Math.min(1, (vit - str + size)));
 
-    if (adjusted_vit <= 0) {
-
-        p_entity.size += p_target.size;
-
-        killEntity(p_target);
-
-    }
+    var dmg = vit - adjusted_vit;
 
     p_target.energy = adjusted_vit;
+    p_entity.energy += dmg;
 
 }
 

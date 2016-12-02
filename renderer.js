@@ -93,7 +93,6 @@ var Renderer = (function contructRenderer() {
                 var heading;
                 var direction;
 
-
                 p_target.energy -= ACTIONS.mate.cost;
 
                 offspring = spawnOffspringWithTarget(p_entity, p_target);
@@ -168,6 +167,12 @@ var Renderer = (function contructRenderer() {
     function calcCircSurface(p_radius) {
 
         return Math.PI * Math.pow(p_radius,2);
+
+    }
+
+    function calcCircRadius(p_surface) {
+
+        return Math.sqrt(p_surface / Math.PI);
 
     }
 
@@ -249,13 +254,23 @@ var Renderer = (function contructRenderer() {
 
     }
 
+    function calcMoveCost(p_entity) {
+
+        var radius = calcEntitySize(p_entity);
+
+        return calcCircSurface(radius) * 0.125;
+
+    }
+
     function deviateMovement(p_entity, p_target) {
 
-        var ratio;
-        var melee_range;
-        var distance;
         var entity_size;
         var target_size;
+        var melee_range;
+        var distance;
+        var ratio;
+        var entity_ratio;
+        var target_ratio;
         var d_x;
         var d_y;
 
@@ -265,25 +280,31 @@ var Renderer = (function contructRenderer() {
         melee_range = entity_size + target_size;
         distance = calcDeltaDistance(p_entity, p_target);
 
-        ratio = 2 * (melee_range - distance) / melee_range;
+        ratio = (melee_range - distance) / melee_range;
+
+        entity_ratio = target_size / melee_range;
+        target_ratio = entity_size / melee_range;
 
         d_x = (calcEntityX(p_entity) - calcEntityX(p_target));
         d_y = (calcEntityY(p_entity) - calcEntityY(p_target));
 
-        p_entity.x = calcEntityX(p_entity) + d_x * ratio;
-        p_entity.y = calcEntityY(p_entity) + d_y * ratio;
+        p_entity.x = calcEntityX(p_entity) + d_x * ratio * entity_ratio;
+        p_entity.y = calcEntityY(p_entity) + d_y * ratio * entity_ratio;
+
+        p_target.x = calcEntityX(p_target) + d_x * ratio * target_ratio,
+        p_target.y = calcEntityY(p_target) + d_y * ratio * target_ratio
 
     }
 
     function moveEntity(p_entity, p_direction) {
 
+        var entity_radius;
+        var colliding_entity;
         var target_entity;
         var target_radius;
-        var entity_radius;
         var distance;
         var melee_range;
         var ratio;
-        var colliding_entity;
 
         var attempts = 0;
         var i = 0;
@@ -423,7 +444,7 @@ var Renderer = (function contructRenderer() {
 
             } else {
 
-                move_cost = calcCircSurface(entity_radius) * 0.125;
+                move_cost = calcMoveCost(entity);
 
                 if (move_cost < entity.energy) {
 
@@ -744,6 +765,9 @@ var Renderer = (function contructRenderer() {
     proto_render.reset = reset;
     proto_render.getHeadingToTarget = getHeadingToTarget;
     proto_render.calcDeltaDistance = calcDeltaDistance;
+    proto_render.calcMoveCost = calcMoveCost;
+    proto_render.calcCircSurface = calcCircSurface;
+    proto_render.calcCircRadius = calcCircRadius;
     proto_render.ACTIONS = ACTIONS;
 
     return proto_render;

@@ -12,7 +12,8 @@ var TRAITS = {
     "green": true,
     "blue": true,
     "like": true,
-    "aggression": true
+    "aggression": true,
+    "defence": true
 };
 var TRAIT_NAMES = Object.keys(TRAITS);
 var NUM_TRAITS = TRAIT_NAMES.length;
@@ -161,12 +162,9 @@ function spawnOffspringWithTarget(p_entity, p_target) {
 
 function updateCounters(p_entity) {
 
-    if (p_entity.size - 0.01 > 0) {
-
-        p_entity.energy += 1;
-        p_entity.size -= 0.0005;
-
-    }
+    //#TODO: Find a good way to incorporate stamina in this metabolism mechanic.
+    p_entity.energy += 1;
+    p_entity.size -= 0.0005;
 
 }
 
@@ -191,7 +189,7 @@ function getTraitSumFromEntity(p_entity) {
 
 function getKillPriority(p_entity, p_target) {
 
-    var potential_gain = p_target.size;
+    var potential_gain = Renderer.getEntitySurface(p_target);
     var distance = Renderer.calcDeltaDistance(p_entity, p_target);
 
     var kill_priority = potential_gain / distance;
@@ -202,33 +200,24 @@ function getKillPriority(p_entity, p_target) {
 
 function getLikeFactorOfTarget(p_entity, p_target) {
 
-    var trait;
     var trait_name;
+    var like_factor;
+
+    var distance = Renderer.calcDeltaDistance(p_entity, p_target);
+    var total = 0;
 
     var i = 0;
     var n = NUM_TRAITS;
-
-    var total = 0;
-    var normalised_total;
-
-    var distance = Renderer.calcDeltaDistance(p_entity, p_target);
-    var d_stamina = p_entity.stamina - p_target.stamina;
-    var travel_cost = distance / (d_stamina - Renderer.ACTIONS.move.cost);
-    var breed_cost = Renderer.ACTIONS.mate.cost / p_entity.stamina;
-
-    var like_factor;
 
     for ( i; i < n; i += 1 ) {
 
         trait_name = TRAIT_NAMES[i];
 
-        total += p_target[trait_name] - p_entity[trait_name];
+        total += (p_target[trait_name] - p_entity[trait_name]);
 
     }
 
-    normalised_total = total / NUM_TRAITS;
-
-    like_factor = normalised_total / (travel_cost + breed_cost);
+    like_factor = total / distance;
 
     return like_factor;
 
@@ -295,16 +284,19 @@ function killEntity(p_entity) {
 
 function attackEntity(p_entity, p_target) {
 
-    var vit = p_target.energy;
     var str = p_entity.strength;
-    var size = p_entity.size;
+    var def = p_target.defence;
+    var entity_surface = Renderer.getEntitySurface(p_entity);
 
-    var adjusted_vit = Math.max(0, Math.min(1, (vit - str + size)));
+    var dmg = (Math.max(0.0001, str - def) * entity_surface);
 
-    var dmg = vit - adjusted_vit;
+    var target_surface = Renderer.getEntitySurface(p_target);
 
-    p_target.energy = adjusted_vit;
-    p_entity.energy += dmg;
+    var new_surface = Math.max(0, target_surface - dmg);
+    var dmg_done = target_surface - new_surface;
+
+    Renderer.setEntitySurface(p_entity, entity_surface + dmg_done);
+    Renderer.setEntitySurface(p_target, new_surface);
 
 }
 

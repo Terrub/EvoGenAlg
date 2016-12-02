@@ -85,7 +85,7 @@ var Renderer = (function contructRenderer() {
 
     var ACTIONS = {
         'mate': {
-            'cost': 5,
+            'cost': 3,
             'execution': function (p_entity, p_target) {
 
                 var offspring;
@@ -242,6 +242,12 @@ var Renderer = (function contructRenderer() {
 
     }
 
+    function setEntitySize(p_entity, p_value) {
+
+        p_entity.size = Math.max(0, ((p_value - 2.5) / 7.5));
+
+    }
+
     function calcEntityX(p_entity) {
 
         return (WIDTH + p_entity.x) % WIDTH;
@@ -386,6 +392,23 @@ var Renderer = (function contructRenderer() {
             assessEntityIntent(entity, p_entities);
 
         }
+
+    }
+
+    function getEntitySurface(p_entity) {
+
+        var radius = calcEntitySize(p_entity);
+        var surface = calcCircSurface(radius);
+
+        return surface;
+
+    }
+
+    function setEntitySurface(p_entity, p_value) {
+
+        var new_radius = calcCircRadius(p_value);
+
+        setEntitySize(p_entity, new_radius);
 
     }
 
@@ -765,9 +788,14 @@ var Renderer = (function contructRenderer() {
     proto_render.reset = reset;
     proto_render.getHeadingToTarget = getHeadingToTarget;
     proto_render.calcDeltaDistance = calcDeltaDistance;
+    proto_render.calcEntitySize = calcEntitySize;
+    proto_render.calcEntityX = calcEntityX
+    proto_render.calcEntityY = calcEntityY;
     proto_render.calcMoveCost = calcMoveCost;
     proto_render.calcCircSurface = calcCircSurface;
     proto_render.calcCircRadius = calcCircRadius;
+    proto_render.getEntitySurface = getEntitySurface;
+    proto_render.setEntitySurface = setEntitySurface;
     proto_render.ACTIONS = ACTIONS;
 
     return proto_render;

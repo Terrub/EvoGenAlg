@@ -306,11 +306,6 @@ var Renderer = (function contructRenderer() {
 
         var entity_radius;
         var colliding_entity;
-        var target_entity;
-        var target_radius;
-        var distance;
-        var melee_range;
-        var ratio;
 
         var attempts = 0;
         var i = 0;
@@ -323,13 +318,9 @@ var Renderer = (function contructRenderer() {
 
         colliding_entity = getCollidingEntity(p_entity);
 
-        while (isDefined(colliding_entity) && attempts < 1000) {
+        if (isDefined(colliding_entity)) {
 
             deviateMovement(p_entity, colliding_entity);
-
-            colliding_entity = getCollidingEntity(p_entity)
-
-            attempts += 1;
 
         }
 

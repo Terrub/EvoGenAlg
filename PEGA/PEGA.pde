@@ -86,6 +86,13 @@ void addCollisionForceTo(Pixie pixie, int index) {
   }
 }
 
+void wrapPosition(Pixie pixie) {
+  if (pixie.pos.x < 0) { pixie.pos.x += width; }
+  if (pixie.pos.x > width) { pixie.pos.x -= width; }
+  if (pixie.pos.y < 0) { pixie.pos.y += height; } 
+  if (pixie.pos.y > height) { pixie.pos.y -= height; }
+}
+
 void updatePixies() {
   for (int i = 0; i < pixies.size(); i += 1) {
     Pixie pixie = (Pixie) pixies.get(i);
@@ -94,10 +101,7 @@ void updatePixies() {
     addCollisionForceTo(pixie, i);
     addResistancesTo(pixie);
     pixie.update();
-    
-    if (pixie.isOutOfBounds(0, width, 0, height)) {
-      pixie.wrapPosition(width, height);
-    }
+    wrapPosition(pixie);
   }
 }
 

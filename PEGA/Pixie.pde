@@ -23,7 +23,6 @@ class Pixie
   
   public void addForce(PVector p_force) {
     PVector force = PVector.div(p_force, this.mass);
-    force.mult(0.5);
     this.acc.add(force);
   }
   
@@ -33,21 +32,5 @@ class Pixie
     
     // Reset current acceleration. We've used it.
     this.acc.mult(0);
-  }
-  
-  public boolean isOutOfBounds(float left, float right, float top, float bottom) {
-    float x = this.pos.x;
-    float y = this.pos.y;
-    
-    return (x < left || x > right || y < top || y > bottom);
-  }
-  
-  public void wrapPosition(float p_width, float p_height) {
-    this.pos.x = (p_width + this.pos.x) % p_width;
-    this.pos.y = (p_height + this.pos.y) % p_height;
-  }
-  
-  public void draw() {
-
   }
 }

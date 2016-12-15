@@ -11,7 +11,7 @@ class Pixie
   public PVector acc = new PVector(0,0);
   
   public Pixie(Genome p_genome, PVector p_pos, PVector p_vel) {
-    this.size = floor(p_genome.getTraitAt(0) * 10 + 10);
+    this.size = floor(p_genome.getTraitAt(0) * 5 + 5);
     this.red = floor(p_genome.getTraitAt(1) * 255);
     this.green = floor(p_genome.getTraitAt(2) * 255);
     this.blue = floor(p_genome.getTraitAt(3) * 255);

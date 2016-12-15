@@ -7,7 +7,7 @@ void setup() {
   size(800, 600);
   background(20);
   
-  createRandomPixies(100);
+  createRandomPixies(1028);
 }
 
 void draw() {
@@ -34,14 +34,16 @@ void addMouseForceTo(Pixie pixie) {
   if (mousePressed) {
     PVector mouse_force = new PVector(mouseX, mouseY);
     
-    if (mouseButton == LEFT) {
+    if (mouseButton == RIGHT) {
       // move towards the mouse
       PVector.sub(mouse_force, pixie.pos, mouse_force);
     }
-    else if (mouseButton == RIGHT) {
+    else if (mouseButton == LEFT) {
       // move away from the mouse
       PVector.sub(pixie.pos, mouse_force, mouse_force);
     }
+    float mag = 1 / mouse_force.mag() * 100;
+    mouse_force.setMag(mag);
     pixie.addForce(mouse_force);
   }
 }
@@ -50,7 +52,7 @@ void addResistancesTo(Pixie pixie) {
   PVector air_resistance = new PVector(0,0);
   air_resistance.sub(pixie.vel);
   
-  float c_d = 0.05;
+  float c_d = 0.01;
   float p = 0.1; 
   float v = pixie.vel.mag();
   float a = pixie.mass;
@@ -72,7 +74,7 @@ void addCollisionForceTo(Pixie pixie, int index) {
     
     if (ds <= (pixie.size / 2) + (target.size / 2)) {
       PVector d_vel = PVector.sub(target.vel, pixie.vel);
-      float acc = (d_vel.mag() / frameRate);
+      float acc = (d_vel.mag() / 60);
       
       PVector impact = PVector.sub(target.pos, pixie.pos);
       impact.mult(pixie.mass * acc);
@@ -87,10 +89,10 @@ void addCollisionForceTo(Pixie pixie, int index) {
 }
 
 void wrapPosition(Pixie pixie) {
-  if (pixie.pos.x < 0) { pixie.pos.x += width; }
-  if (pixie.pos.x > width) { pixie.pos.x -= width; }
-  if (pixie.pos.y < 0) { pixie.pos.y += height; } 
-  if (pixie.pos.y > height) { pixie.pos.y -= height; }
+  if (pixie.pos.x < 0) pixie.pos.x += width;
+  if (pixie.pos.x > width) pixie.pos.x -= width;
+  if (pixie.pos.y < 0) pixie.pos.y += height; 
+  if (pixie.pos.y > height) pixie.pos.y -= height;
 }
 
 void updatePixies() {

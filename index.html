@@ -4,51 +4,186 @@
     <meta charset="utf-8" />
     <title>Pixies</title>
     <script src="utils.js"></script>
-    <script src="display.js"></script>
-    <script src="entities.js"></script>
-    <script src="grid.js"></script>
+    <script src="actors/display.js"></script>
+    <script src="actors/world.js"></script>
+    <script src="actors/mainloop.js"></script>
+    <script src="connectors/renderer.js"></script>
 
 <style type="text/css">
+    body {
+        color: white;
+        margin: 0;
+        padding: 0;
+        background-color: black;
+    }
 
-        body {
-            color: white;
-            margin: 0;
-            padding: 0;
-            background-color: black;
-        }
+    canvas {
+        background-color: #161616;
+    }
 
-        button, input {
-            width: 5em;
-            height: 2em;
-            border-radius: 0.5em;
-            padding: 0.35em;
-            text-align: center;
-        }
+    button, input {
+        width: 5em;
+        height: 2em;
+        border-radius: 0.5em;
+        padding: 0.35em;
+        text-align: center;
+    }
 
-        input {
-            padding: 0;
-        }
+    input {
+        padding: 0;
+    }
 
-        input:invalid {
-          border: 1px solid red;
-        }
+    input:invalid {
+        border: 1px solid red;
+    }
 
-        input:valid {
-          border: 1px solid green;
-        }
-
+    input:valid {
+        border: 1px solid green;
+    }
 </style></head><body><div>
 
     <label>
-        Entities: <input type="number" name="entity_count" value="100" min="2" pattern="^\d+$" />
+        Entities: <input type="number" name="entity_count" value="0" min="2" pattern="^\d+$" />
     </label>
-    <button onclick="Renderer.start()">start</button>
-    <button onclick="Renderer.stop()">stop</button>
-    <button onclick="Renderer.reset()">reset</button>
+    <button onclick="mainloop.start()">start</button>
+    <button onclick="mainloop.stop()">stop</button>
+    <button onclick="mainloop.reset()">reset</button>
     FPS: <span name="frame_rate"></span>
 
 </div>
+<canvas id="test_canvas"></canvas>
+    <script>
+        canvas = document.getElementById("test_canvas");
+        canvas.width = window.innerWidth - 20;
+        canvas.height = window.innerHeight - 50;
+        canvas.style.top = "40px";
+        canvas.style.left = "10px";
+        canvas.style.position = "absolute";
 
-    <script src="renderer.js"></script>
+        var size = 5;
+        let world_width = (canvas.width / size | 0);
+        let world_height = (canvas.height / size | 0);
+
+        var display = createDisplay(canvas);
+        var world = createWorld(world_width, world_height);
+        var renderer = createRenderer(display, world, size);
+
+        function traitMatchesGround(trait, ground) {
+            return (trait ^ ground) === 0;
+        }
+
+        function getOctetAt(x, y) {
+            let octet = "";
+            octet += world.getGridValueAt(x-1, y-1);
+            octet += world.getGridValueAt(x, y-1);
+            octet += world.getGridValueAt(x+1, y-1);
+            octet += world.getGridValueAt(x-1, y);
+            octet += world.getGridValueAt(x+1, y);
+            octet += world.getGridValueAt(x-1, y+1);
+            octet += world.getGridValueAt(x, y+1);
+            octet += world.getGridValueAt(x+1, y+1);
+
+            return octet;
+        }
+
+        function getNeighbourPosition(x, y, i) {
+            if (i > 4) { i += 1; }
+            const x_offset = (i % 3) - 1;
+            const y_offset = (i / 3 | 0) - 1;
+
+            return {
+                x: x + x_offset,
+                y: y + y_offset
+            };
+        }
+
+        let entities;
+        const target_fps = (1000/60);
+
+        function renderWorld() {
+            if (isUndefined(entities) || entities.length < 1) {
+                // report("Starting new list of entities");
+                entities = world.getEntities().slice();
+
+                document.querySelector('[name="entity_count"]').value = entities.length;
+            }
+
+            let last_time = getTime();
+            let current_time = last_time;
+            let entity = entities.shift();
+
+            while (isDefined(entity) && (current_time - last_time <= target_fps)) {
+                const position = world.getPositionFromIndex(entity.position);
+                const genome = entity.genome;
+                const ground = getOctetAt(position.x, position.y);
+
+                entity.increaseAge();
+                if (entity.age > 100) {
+                    world.killEntityAt(position.x, position.y);
+                }
+                else {
+                    for (let i = 0; i < genome.length; i += 16) {
+                        const trait = genome.substr(i, 8);
+                        const output = genome.substr(i + 8, 8);
+
+                        if (traitMatchesGround(trait, ground)) {
+                            for (let j = 0; j < 8; j += 1) {
+                                let nibble = "";
+                                const output_nibble = output[j];
+                                const ground_nibble = ground[j];
+
+                                nibble = output_nibble;
+
+                                const neighbourPosition = getNeighbourPosition(position.x, position.y, j);
+                                const neighbour = world.getEntityAt(neighbourPosition.x, neighbourPosition.y);
+                                if (nibble === "1") {
+                                    let offspring_genome;
+                                    if (neighbour) {
+                                        offspring_genome = world.combineGenomes(genome, neighbour.genome);
+                                        world.killEntityAt(neighbourPosition.x, neighbourPosition.y);
+                                    }
+                                    else if ((Math.random() + 0.001 | 0) === 1) {
+                                        offspring_genome = world.mutateGenome(genome);
+                                    }
+                                    else {
+                                        offspring_genome = genome;
+                                    }
+
+                                    const entity = world.createEntity(offspring_genome);
+                                    world.addEntityAt(entity, neighbourPosition.x, neighbourPosition.y);
+                                }
+                                else if (nibble === "0") {
+                                    if (neighbour) {
+                                        world.killEntityAt(neighbourPosition.x, neighbourPosition.y);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                current_time = getTime();
+                entity = entities.shift();
+            }
+
+            renderer.renderCurrentState();
+        }
+
+        var mainloop = createMainloop(renderWorld);
+
+        const grid = world.getGrid();
+        for (let index = 0; index < grid.length; index += 1) {
+            const cell = grid[index];
+            if (cell === 1) {
+                const genome = world.createGenome();
+                const entity = world.createEntity(genome);
+                const position = world.getPositionFromIndex(index);
+                world.addEntityAt(entity, position.x, position.y);
+            }
+        }
+        
+        // renderer.renderCurrentState();
+        mainloop.start();
+    </script>
 
 </body></html>

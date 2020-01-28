@@ -118,7 +118,7 @@
                 const ground = getOctetAt(position.x, position.y);
 
                 entity.increaseAge();
-                if (entity.age > 100) {
+                if ((Math.random() + (entity.age / 10000) | 0 == 1)) {
                     world.killEntityAt(position.x, position.y);
                 }
                 else {

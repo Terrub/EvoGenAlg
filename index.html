@@ -136,7 +136,7 @@
 
                                 const neighbourPosition = getNeighbourPosition(position.x, position.y, j);
                                 const neighbour = world.getEntityAt(neighbourPosition.x, neighbourPosition.y);
-                                if (nibble === "1") {
+                                if (nibble === "1" && world.getEntities().length < 5000) {
                                     let offspring_genome;
                                     if (neighbour) {
                                         offspring_genome = world.combineGenomes(genome, neighbour.genome);
@@ -152,7 +152,7 @@
                                     const entity = world.createEntity(offspring_genome);
                                     world.addEntityAt(entity, neighbourPosition.x, neighbourPosition.y);
                                 }
-                                else if (nibble === "0") {
+                                else {
                                     if (neighbour) {
                                         world.killEntityAt(neighbourPosition.x, neighbourPosition.y);
                                     }

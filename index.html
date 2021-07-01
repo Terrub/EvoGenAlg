@@ -1,28 +1,54 @@
-<!doctype html><html><head>
+<!doctype html>
+<html>
+
+<head>
 
     <!-- Meta data stuff -->
     <meta charset="utf-8" />
     <title>Pixies</title>
-    <script src="utils.js"></script>
-    <script src="display.js"></script>
-    <script src="entities.js"></script>
-    <script src="grid.js"></script>
+    <!-- <script src="utils.js"></script> -->
+    <!-- <script src="actors/display.js"></script> -->
+    <!-- <script src="actors/world.js"></script> -->
+    <!-- <script src="actors/mainloop.js"></script> -->
+    <script src="connectors/renderer.js"></script>
+    <script type="module" src="./main.js"></script>
 
-<style type="text/css">
+    <style type="text/css">
+        html {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
 
         body {
             color: white;
             margin: 0;
             padding: 0;
             background-color: black;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
-        button, input {
+        canvas {
+            background-color: #161616;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        button,
+        input {
             width: 5em;
             height: 2em;
             border-radius: 0.5em;
             padding: 0.35em;
             text-align: center;
+            opacity: 50%;
         }
 
         input {
@@ -30,25 +56,32 @@
         }
 
         input:invalid {
-          border: 1px solid red;
+            border: 1px solid red;
         }
 
         input:valid {
-          border: 1px solid green;
+            border: 1px solid green;
         }
+    </style>
+</head>
 
-</style></head><body><div>
+<body>
+    <canvas id="test_canvas"></canvas>
+    <div>
+        <label>
+            Entities: <input type="number" name="entity_count" value="0" min="2" pattern="^\d+$" />
+        </label>
+        <button id="btn_start">start</button>
+        <button id="btn_stop" onclick="mainloop.stop()">stop</button>
+        <button id="btn_reset" onclick="mainloop.reset()">reset</button>
+        <button id="btn_colors" onclick="renderer.toggleColorRenderer()">colors</button>
+        <!-- FPS: <span name="frame_rate"></span> -->
+        <label>
+            Max: <span name="max_gnome">0</span>
+            Min: <span name="min_gnome">0</span>
+            Avg: <span name="avg_gnome">0</span>
+        </label>
+    </div>
+</body>
 
-    <label>
-        Entities: <input type="number" name="entity_count" value="100" min="2" pattern="^\d+$" />
-    </label>
-    <button onclick="Renderer.start()">start</button>
-    <button onclick="Renderer.stop()">stop</button>
-    <button onclick="Renderer.reset()">reset</button>
-    FPS: <span name="frame_rate"></span>
-
-</div>
-
-    <script src="renderer.js"></script>
-
-</body></html>
+</html>

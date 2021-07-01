@@ -1,0 +1,15 @@
+*.min.js
+**/*{.,-}min.js
+node_modules/*
+public/assets/js/*
+vendor/*
+public/js/app.js
+public/js/vendor.js
+public/js/manifest.js
+public_html/*
+app/assets/js/flatpickr.js
+app/assets/js/bootstrap-switch.js
+app/assets/js/load-twitter.js
+app/assets/js/load-gtm.js
+public/assets/admin/*
+resources/js/*

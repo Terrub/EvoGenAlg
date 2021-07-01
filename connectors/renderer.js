@@ -1,32 +1,40 @@
+/* eslint
+    no-bitwise: ["error", { "allow": ["|", "^"] }]
+ */
 class Renderer {
-  #display;
-  #world;
-  #size;
-  #colorRenderer;
-  #current_colour_render_index = 0;
-  #color_renderers = [
+  display;
+
+  world;
+
+  size;
+
+  colorRenderer;
+
+  currentColourRenderIndex = 0;
+
+  colorRenderers = [
     Renderer.getColorFromSegmentByteAverage,
     Renderer.getColorFromTraitCountsLog,
-    Renderer.getColorFromTraitCountsSin
+    Renderer.getColorFromTraitCountsSin,
   ];
 
   constructor(display, world, size) {
-    this.#display = display;
-    this.#world = world;
-    this.#size = size;
+    this.display = display;
+    this.world = world;
+    this.size = size;
 
-    this.#colorRenderer = this.#color_renderers[this.#current_colour_render_index];
+    this.colorRenderer = this.colorRenderers[this.currentColourRenderIndex];
   }
 
-  static getByteAverage(byte_segment) {
+  static getByteAverage(byteSegment) {
     let total = 0;
-    const num_bytes = byte_segment.length / 8 | 0;
-    for (let i = 0; i < byte_segment.length; i += 8) {
-      const byte = byte_segment.substr(i, 8);
+    const numBytes = (byteSegment.length / 8) | 0;
+    for (let i = 0; i < byteSegment.length; i += 8) {
+      const byte = byteSegment.substr(i, 8);
       total += parseInt(byte, 2);
     }
 
-    return total / num_bytes | 0;
+    return (total / numBytes) | 0;
   }
 
   static calcInverseLogValue(num, total) {
@@ -36,11 +44,11 @@ class Renderer {
     // y = 10 ^ |  ------- * (log(y1) - log(y0)) + log(y0) |
     //           \ x1 - x0                                /
 
-    const y_max = Math.log(255);
-    // const y_min = Math.log(1);
-    const y_min = 0;
+    const yMax = Math.log(255);
+    // const yMin = Math.log(1);
+    const yMin = 0;
 
-    return Math.E ^ (((num - 1) / (total - 1)) * ((y_max - y_min) + y_min));
+    return Math.E ^ (((num - 1) / (total - 1)) * ((yMax - yMin) + yMin));
   }
 
   static calcLogValue(num, total) {
@@ -51,32 +59,32 @@ class Renderer {
     // //                 log(y1) - log(y0)
     const ln = Math.log;
 
-    const x_max = 255;
-    const x_min = 0;
+    const xMax = 255;
+    const xMin = 0;
     const y = num;
-    const y_max = total;
-    const y_min = 1;
+    const yMax = total;
+    const yMin = 1;
 
-    const log_y = ln(y);
-    const log_y_min = ln(y_min);
-    const log_y_max = ln(y_max);
+    const logY = ln(y);
+    const logYMin = ln(yMin);
+    const logYMax = ln(yMax);
 
-    return (x_max - x_min) * (log_y - log_y_min) / (log_y_max - log_y_min) + x_min;
+    return ((xMax - xMin) * (logY - logYMin)) / (logYMax - logYMin) + xMin;
   }
 
   static calcSinValue(num, total) {
-    return Math.sin((Math.PI / 2) * (num / total)) * 255 | 0
+    return (Math.sin((Math.PI / 2) * (num / total)) * 255) | 0;
   }
 
   static getColorFromTraitCountsLog(genome) {
-    const red_count = (genome.match(/00/g) || []).length;
-    const grn_count = (genome.match(/11/g) || []).length;
-    const blu_count = (genome.match(/01/g) || []).length;
-    const total_count = red_count + blu_count + grn_count;
+    const redCount = (genome.match(/00/g) || []).length;
+    const grnCount = (genome.match(/11/g) || []).length;
+    const bluCount = (genome.match(/01/g) || []).length;
+    const totalCount = redCount + bluCount + grnCount;
 
-    const r = Renderer.calcLogValue(red_count, total_count) | 0;
-    const g = Renderer.calcLogValue(grn_count, total_count) | 0;
-    const b = Renderer.calcLogValue(blu_count, total_count) | 0;
+    const r = Renderer.calcLogValue(redCount, totalCount) | 0;
+    const g = Renderer.calcLogValue(grnCount, totalCount) | 0;
+    const b = Renderer.calcLogValue(bluCount, totalCount) | 0;
 
     const color = `rgb(${r},${g},${b})`;
 
@@ -84,15 +92,15 @@ class Renderer {
   }
 
   static getColorFromSegmentByteAverage(genome) {
-    const num_channel_segments = (genome.length / 3 | 0);
+    const numChannelSegments = (genome.length / 3) | 0;
 
-    const red_segment = genome.substr(0 * num_channel_segments, num_channel_segments);
-    const grn_segment = genome.substr(1 * num_channel_segments, num_channel_segments);
-    const blu_segment = genome.substr(2 * num_channel_segments, num_channel_segments);
+    const redSegment = genome.substr(0 * numChannelSegments, numChannelSegments);
+    const grnSegment = genome.substr(1 * numChannelSegments, numChannelSegments);
+    const bluSegment = genome.substr(2 * numChannelSegments, numChannelSegments);
 
-    const r = Renderer.getByteAverage(red_segment);
-    const g = Renderer.getByteAverage(grn_segment);
-    const b = Renderer.getByteAverage(blu_segment);
+    const r = Renderer.getByteAverage(redSegment);
+    const g = Renderer.getByteAverage(grnSegment);
+    const b = Renderer.getByteAverage(bluSegment);
 
     const color = `rgb(${r},${g},${b})`;
 
@@ -100,14 +108,14 @@ class Renderer {
   }
 
   static getColorFromTraitCountsSin(genome) {
-    const red_count = (genome.match(/00/g) || []).length;
-    const grn_count = (genome.match(/11/g) || []).length;
-    const blu_count = (genome.match(/01/g) || []).length;
-    const total_count = red_count + blu_count + grn_count;
+    const redCount = (genome.match(/00/g) || []).length;
+    const grnCount = (genome.match(/11/g) || []).length;
+    const bluCount = (genome.match(/01/g) || []).length;
+    const totalCount = redCount + bluCount + grnCount;
 
-    const r = Renderer.calcSinValue(red_count, total_count);
-    const g = Renderer.calcSinValue(grn_count, total_count);
-    const b = Renderer.calcSinValue(blu_count, total_count);
+    const r = Renderer.calcSinValue(redCount, totalCount);
+    const g = Renderer.calcSinValue(grnCount, totalCount);
+    const b = Renderer.calcSinValue(bluCount, totalCount);
 
     const color = `rgb(${r},${g},${b})`;
 
@@ -115,9 +123,9 @@ class Renderer {
   }
 
   renderCurrentState() {
-    const display = this.#display;
-    const world = this.#world;
-    const size = this.#size;
+    const { display } = this;
+    const { world } = this;
+    const { size } = this;
 
     display.clear();
 
@@ -128,22 +136,23 @@ class Renderer {
         const position = world.getPositionFromIndex(index);
         const entity = world.getEntityAtIndex(index);
         if (entity) {
-          const genome = entity.genome;
-          const color = this.#colorRenderer(genome);
+          const { genome } = entity;
+          const color = this.colorRenderer(genome);
           display.drawRect(position.x * size, position.y * size, size, size, color);
         }
       }
     }
 
-    let stats = world.getGenomeStats()
-    document.querySelector('[name="max_gnome"]').innerHTML = stats["max"]
-    document.querySelector('[name="min_gnome"]').innerHTML = stats["min"]
-    document.querySelector('[name="avg_gnome"]').innerHTML = stats["avg"]
+    const stats = world.getGenomeStats();
+    document.querySelector('[name="max_gnome"]').innerHTML = stats.max;
+    document.querySelector('[name="min_gnome"]').innerHTML = stats.min;
+    document.querySelector('[name="avg_gnome"]').innerHTML = stats.avg;
   }
 
   toggleColorRenderer() {
-    this.#current_colour_render_index = (this.#current_colour_render_index + 1) % this.#color_renderers.length;
+    const newIndex = (this.currentColourRenderIndex + 1) % this.colorRenderers.length;
+    this.currentColourRenderIndex = newIndex;
 
-    this.#colorRenderer = this.#color_renderers[this.#current_colour_render_index];
+    this.colorRenderer = this.colorRenderers[this.currentColourRenderIndex];
   }
 }

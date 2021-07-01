@@ -1,7 +1,7 @@
 export class Display {
-  #width;
+  width;
 
-  #height;
+  height;
 
   constructor(glib, width, height) {
     this.width = width;

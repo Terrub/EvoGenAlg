@@ -4,38 +4,38 @@
  */
 
 export class World {
-  #grid;
+  grid;
 
-  #width;
+  width;
 
-  #height;
+  height;
 
-  #chanceToMutate;
+  chanceToMutate;
 
-  #maxEntities;
+  maxEntities;
 
-  #maxNumTraits;
+  maxNumTraits;
 
-  #minNumTraits;
+  minNumTraits;
 
-  #maxEntityAge = 10000;
+  maxEntityAge = 10000;
 
-  #entities = [];
+  entities = [];
 
-  #entityPositions = {};
+  entityPositions = {};
 
   constructor(width, height,
     entitiesStartAmount, maxEntities,
     maxNumTraits, minNumTraits, chanceToMutate) {
-    this.#width = width;
-    this.#height = height;
-    this.#maxEntities = maxEntities;
-    this.#maxNumTraits = maxNumTraits;
-    this.#minNumTraits = minNumTraits;
-    this.#chanceToMutate = chanceToMutate;
+    this.width = width;
+    this.height = height;
+    this.maxEntities = maxEntities;
+    this.maxNumTraits = maxNumTraits;
+    this.minNumTraits = minNumTraits;
+    this.chanceToMutate = chanceToMutate;
 
     // Create the random world grid
-    this.#grid = new Uint8Array(width * height);
+    this.grid = new Uint8Array(width * height);
 
     // for (let i = 0; i < grid.length; i += 1) {
     //     const value = Math.random() + 0.05 | 0;
@@ -46,7 +46,7 @@ export class World {
       const x = (Math.random() * width) | 0;
       const y = (Math.random() * height) | 0;
       const index = (x) + (y * width);
-      this.#grid[index] = 1;
+      this.grid[index] = 1;
     }
   }
 
@@ -105,23 +105,23 @@ export class World {
   }
 
   entityShouldDie(entity) {
-    return (Math.random() + (entity.age / this.#maxEntityAge) | 0 === 1);
+    return (Math.random() + (entity.age / this.maxEntityAge) | 0 === 1);
   }
 
   getIndexFromPosition(x, y) {
-    return y * this.#width + x;
+    return y * this.width + x;
   }
 
   getPositionFromIndex(index) {
     return {
-      x: (index % this.#width),
-      y: (index / this.#width | 0),
+      x: (index % this.width),
+      y: (index / this.width | 0),
     };
   }
 
   createGenome() {
     // create between [1,8) pairs of segments
-    const numTraits = 2 * generateRandomNumber(this.#maxNumTraits, this.#minNumTraits);
+    const numTraits = 2 * generateRandomNumber(this.maxNumTraits, this.minNumTraits);
     let genome = '';
 
     // Seed the empty genome with random octets
@@ -153,9 +153,9 @@ export class World {
     const entity = pEntity;
 
     entity.index = index;
-    if (index >= 0 && index < (this.#width * this.#height)) {
-      this.#entityPositions[index] = entity;
-      this.#entities.push(entity);
+    if (index >= 0 && index < (this.width * this.height)) {
+      this.entityPositions[index] = entity;
+      this.entities.push(entity);
     }
 
     const position = this.getPositionFromIndex(index);
@@ -169,20 +169,20 @@ export class World {
 
   killEntity(entity) {
     const { index } = entity;
-    for (let i = 0; i < this.#entities.length; i += 1) {
-      const entity = this.#entities[i];
+    for (let i = 0; i < this.entities.length; i += 1) {
+      const entity = this.entities[i];
       if (entity.index === index) {
-        this.#entities.splice(i, 1);
+        this.entities.splice(i, 1);
       }
     }
-    delete this.#entityPositions[index];
+    delete this.entityPositions[index];
 
     const position = this.getPositionFromIndex(index);
     this.setGridValueAt(0, position.x, position.y);
   }
 
   getEntityAtIndex(index) {
-    return this.#entityPositions[index];
+    return this.entityPositions[index];
   }
 
   getEntityAt(x, y) {
@@ -200,22 +200,22 @@ export class World {
   }
 
   getEntities() {
-    return this.#entities;
+    return this.entities;
   }
 
   getGrid() {
-    return this.#grid;
+    return this.grid;
   }
 
   isPositionInGrid(x, y) {
-    return (x >= 0 && x < this.#width && y >= 0 && y < this.#height);
+    return (x >= 0 && x < this.width && y >= 0 && y < this.height);
   }
 
   getGridValueAt(x, y) {
     let value = 0;
     if (this.isPositionInGrid(x, y)) {
       const index = this.getIndexFromPosition(x, y);
-      value = this.#grid[index];
+      value = this.grid[index];
     }
 
     return value;
@@ -224,7 +224,7 @@ export class World {
   setGridValueAt(value, x, y) {
     if (this.isPositionInGrid(x, y)) {
       const index = this.getIndexFromPosition(x, y);
-      this.#grid[index] = value;
+      this.grid[index] = value;
     }
   }
 
@@ -266,11 +266,11 @@ export class World {
                 this.killEntity(neighbour);
               }
 
-              if (outputNibble === '1' && this.getEntities().length < this.#maxEntities) {
+              if (outputNibble === '1' && this.getEntities().length < this.maxEntities) {
                 let offspringGenome;
                 if (neighbour) {
                   offspringGenome = World.combineGenomes(genome, neighbour.genome);
-                } else if ((Math.random() + this.#chanceToMutate | 0) === 1) {
+                } else if ((Math.random() + this.chanceToMutate | 0) === 1) {
                   offspringGenome = World.mutateGenome(genome);
                 } else {
                   offspringGenome = genome;
@@ -315,8 +315,8 @@ export class World {
     let maxGnome;
     let minGnome;
 
-    for (let i = 0; i < this.#entities.length; i += 1) {
-      lenGnome = this.#entities[i].genome.length;
+    for (let i = 0; i < this.entities.length; i += 1) {
+      lenGnome = this.entities[i].genome.length;
       if (maxGnome === undefined || maxGnome < lenGnome) {
         maxGnome = lenGnome;
       }
@@ -329,7 +329,7 @@ export class World {
     return {
       max: maxGnome,
       min: minGnome,
-      avg: (avgGnome / this.#entities.length) | 0,
+      avg: (avgGnome / this.entities.length) | 0,
     };
   }
 }

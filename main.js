@@ -6,6 +6,7 @@ import { Utils } from './utils.js';
 import { Display } from './actors/display.js';
 import { createMainloop } from './actors/mainloop.js';
 import { World } from './actors/world.js';
+import { Entity } from './actors/entity.js';
 import { Renderer } from './connectors/renderer.js';
 
 const canvas = document.getElementById('test_canvas');
@@ -20,11 +21,11 @@ const { height } = canvas;
 const worldConfig = [
   (width / size | 0), // width
   (height / size | 0), // height
-  300, // entities_start_amount
+  1500, // entities_start_amount
   1500, // max_entities
-  100, // max_num_traits
-  5, // min_num_traits
-  0.001, // chance_to_mutate
+  10, // max_num_traits
+  1, // min_num_traits
+  0.006, // chance_to_mutate
 ];
 
 const display = new Display(glib, width, height);
@@ -57,7 +58,7 @@ for (let index = 0; index < grid.length; index += 1) {
   const cell = grid[index];
   if (cell === 1) {
     const genome = world.createGenome();
-    const entity = world.createEntity(genome);
+    const entity = new Entity(genome);
     world.addEntityAtIndex(entity, index);
   }
 }

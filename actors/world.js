@@ -1,9 +1,9 @@
 /* eslint
     no-bitwise: ["error", { "allow": ["|", "^"] }]
-    class-methods-use-this: ["error", { "exceptMethods": ["createEntity"] }]
  */
 
 import { Utils } from '../utils.js';
+import { Entity } from '../actors/entity.js';
 
 export class World {
   grid;
@@ -134,23 +134,6 @@ export class World {
     return genome;
   }
 
-  // TODO: Really, create an entity class and use that. This is shitty AF.
-  createEntity(pGenome) {
-    let entity;
-
-    function increaseEntityAge() {
-      entity.age += 1;
-    }
-
-    entity = {
-      genome: pGenome,
-      age: 0,
-      increaseAge: increaseEntityAge,
-    };
-
-    return entity;
-  }
-
   addEntityAtIndex(pEntity, index) {
     const entity = pEntity;
 
@@ -160,8 +143,7 @@ export class World {
       this.entities.push(entity);
     }
 
-    const position = this.getPositionFromIndex(index);
-    this.setGridValueAt(1, position.x, position.y);
+    this.setGridValueAtIndex(1, index);
   }
 
   addEntityAtPosition(entity, x, y) {
@@ -170,17 +152,18 @@ export class World {
   }
 
   killEntity(entity) {
-    const { index } = entity;
+    const entityIndex = entity.index;
+
     for (let i = 0; i < this.entities.length; i += 1) {
       const entity = this.entities[i];
-      if (entity.index === index) {
+      if (entity.index === entityIndex) {
         this.entities.splice(i, 1);
       }
     }
-    delete this.entityPositions[index];
 
-    const position = this.getPositionFromIndex(index);
-    this.setGridValueAt(0, position.x, position.y);
+    delete this.entityPositions[entityIndex];
+
+    this.setGridValueAtIndex(0, entityIndex);
   }
 
   getEntityAtIndex(index) {
@@ -201,6 +184,12 @@ export class World {
     return !!entity;
   }
 
+  hasEntityAtIndex(index) {
+    const entity = this.getEntityAtIndex(index);
+
+    return !!entity;
+  }
+
   getEntities() {
     return this.entities;
   }
@@ -210,24 +199,26 @@ export class World {
   }
 
   isPositionInGrid(x, y) {
-    return (x >= 0 && x < this.width && y >= 0 && y < this.height);
+    const index = this.getIndexFromPosition(x, y);
+    return (0 <= index && index < this.grid.length);
+  }
+
+  getGridValueAtIndex(index) {
+    return this.grid[index];
   }
 
   getGridValueAt(x, y) {
     let value = 0;
     if (this.isPositionInGrid(x, y)) {
       const index = this.getIndexFromPosition(x, y);
-      value = this.grid[index];
+      value = this.getGridValueAtIndex(index);
     }
 
     return value;
   }
 
-  setGridValueAt(value, x, y) {
-    if (this.isPositionInGrid(x, y)) {
-      const index = this.getIndexFromPosition(x, y);
-      this.grid[index] = value;
-    }
+  setGridValueAtIndex(value, index) {
+    this.grid[index] = value;
   }
 
   getOctetAt(x, y) {
@@ -260,7 +251,6 @@ export class World {
               const offsetX = position.x + ox;
               const offsetY = position.y + oy;
               const outputNibble = output[index];
-              index += 1;
 
               const neighbour = this.getEntityAt(offsetX, offsetY);
 
@@ -270,7 +260,7 @@ export class World {
 
               if (outputNibble === '1' && this.getEntities().length < this.maxEntities) {
                 let offspringGenome;
-                if (neighbour) {
+                if (neighbour && genome !== neighbour.genome) {
                   offspringGenome = World.combineGenomes(genome, neighbour.genome);
                 } else if ((Math.random() + this.chanceToMutate | 0) === 1) {
                   offspringGenome = World.mutateGenome(genome);
@@ -278,9 +268,11 @@ export class World {
                   offspringGenome = genome;
                 }
 
-                const entity = this.createEntity(offspringGenome);
+                const entity = new Entity(offspringGenome);
                 this.addEntityAtPosition(entity, offsetX, offsetY);
               }
+
+              index += 1;
             }
           }
         }
@@ -293,11 +285,10 @@ export class World {
   //      Then kill off whatever dies this generation.
   parseEntityEvolution(entities) {
     let entity = entities.shift();
-    let index = 0;
+    let currentEntityIndex = 0;
     const numEntities = entities.length;
 
-    // TODO: isDefined should be part of Utils.
-    while (Utils.isDefined(entity) && index < numEntities) {
+    while (Utils.isDefined(entity) && currentEntityIndex < numEntities) {
       entity.increaseAge();
 
       this.parseEntityOutput(entity);
@@ -307,7 +298,17 @@ export class World {
       }
 
       entity = entities.shift();
-      index += 1;
+      currentEntityIndex += 1;
+    }
+
+    while (currentEntityIndex <= this.maxEntities) {
+      let index = Utils.generateRandomNumber(0, this.grid.length - 1);
+      if (!this.hasEntityAtIndex(index)) {
+        const genome = this.createGenome();
+        const entity = new Entity(genome);
+        this.addEntityAtIndex(entity, index);
+        currentEntityIndex += 1;
+      }
     }
   }
 

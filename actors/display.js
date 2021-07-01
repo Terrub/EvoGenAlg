@@ -1,28 +1,25 @@
-function createDisplay(canvas) {
-    var proto_display;
-    var glib;
+export class Display {
+  #width;
 
-    function drawPixel(x, y, color) {
-        glib.fillStyle = color;
-        glib.fillRect(x, y, 1, 1);
-    }
+  #height;
 
-    function drawRect(x, y, x2, y2, color) {
-        glib.fillStyle = color;
-        glib.fillRect(x, y, x2, y2);
-    }
+  constructor(glib, width, height) {
+    this.width = width;
+    this.height = height;
+    this.glib = glib;
+  }
 
-    function clear() {
-        glib.clearRect(0, 0, canvas.width, canvas.height);
-    }
+  drawPixel(x, y, color) {
+    this.glib.fillStyle = color;
+    this.glib.fillRect(x, y, 1, 1);
+  }
 
-    glib = canvas.getContext("2d");
+  drawRect(x, y, x2, y2, color) {
+    this.glib.fillStyle = color;
+    this.glib.fillRect(x, y, x2, y2);
+  }
 
-    proto_display = {
-        "drawPixel": drawPixel,
-        "drawRect": drawRect,
-        "clear": clear
-    }
-
-    return proto_display;
+  clear() {
+    this.glib.clearRect(0, 0, this.width, this.height);
+  }
 }

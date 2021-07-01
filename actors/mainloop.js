@@ -1,3 +1,5 @@
+import { Utils } from '../utils.js';
+
 // TODO: See if we can turn this into a class after all.
 /*
   Currently I cannot turn this into a class simply, as the tic function passed to the window's
@@ -9,8 +11,8 @@
   the time investment.
  */
 export function createMainloop(frameRender) {
-  if (!isFunction(frameRender)) {
-    reportUsageError('Usage: createMainloop(frameRender: function');
+  if (!Utils.isFunction(frameRender)) {
+    Utils.reportUsageError('Usage: createMainloop(frameRender: function');
   }
 
   let animating = false;
@@ -27,12 +29,12 @@ export function createMainloop(frameRender) {
     start: function start() {
       if (animating === true) { return; }
       animating = true;
-      report('Animation started');
+      Utils.report('Animation started');
       tic();
     },
     stop: function stop() {
       animating = false;
-      report('Animation stopped');
+      Utils.report('Animation stopped');
     },
     reset: function reset() {},
   };

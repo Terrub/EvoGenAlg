@@ -3,6 +3,8 @@
     class-methods-use-this: ["error", { "exceptMethods": ["createEntity"] }]
  */
 
+import { Utils } from '../utils.js';
+
 export class World {
   grid;
 
@@ -121,7 +123,7 @@ export class World {
 
   createGenome() {
     // create between [1,8) pairs of segments
-    const numTraits = 2 * generateRandomNumber(this.maxNumTraits, this.minNumTraits);
+    const numTraits = 2 * Utils.generateRandomNumber(this.maxNumTraits, this.minNumTraits);
     let genome = '';
 
     // Seed the empty genome with random octets
@@ -295,7 +297,7 @@ export class World {
     const numEntities = entities.length;
 
     // TODO: isDefined should be part of Utils.
-    while (isDefined(entity) && index < numEntities) {
+    while (Utils.isDefined(entity) && index < numEntities) {
       entity.increaseAge();
 
       this.parseEntityOutput(entity);

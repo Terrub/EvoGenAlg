@@ -1,7 +1,7 @@
 /* eslint
     no-bitwise: ["error", { "allow": ["|", "^"] }]
  */
-class Renderer {
+export class Renderer {
   display;
 
   world;

@@ -14,7 +14,7 @@ export class Renderer {
 
   colorRenderers = [
     Renderer.getColorFromSegmentByteAverage,
-    Renderer.getColorFromTraitCountsLog,
+    // Renderer.getColorFromTraitCountsLog,
     Renderer.getColorFromTraitCountsSin,
   ];
 

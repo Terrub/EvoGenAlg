@@ -9,6 +9,16 @@ import { World } from './actors/world.js';
 import { Entity } from './actors/entity.js';
 import { Renderer } from './connectors/renderer.js';
 
+/*
+  Thoughts:
+  Make entities battle. see who overwrites who more often, that one wins => Bigger genomes have higher survival rate
+  Make entities age based on how many 'actions'/changes they do => Fast burners vs slow simmers.
+    > the two above counteract one another making it more likely a survival of the fittest thing.
+      Too slow? You get eaten or starve due to new competitions
+      Too fast? You die out of starvation due to burning up too much
+*/
+
+
 const canvas = document.getElementById('test_canvas');
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;

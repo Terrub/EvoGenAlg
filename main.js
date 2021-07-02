@@ -33,7 +33,7 @@ const worldConfig = [
   (height / size | 0), // height
   1500, // entities_start_amount
   1500, // max_entities
-  10, // max_num_traits
+  1, // max_num_traits
   1, // min_num_traits
   0.006, // chance_to_mutate
 ];

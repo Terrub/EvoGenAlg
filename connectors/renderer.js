@@ -28,10 +28,13 @@ export class Renderer {
 
   static getByteAverage(byteSegment) {
     let total = 0;
-    const numBytes = (byteSegment.length / 8) | 0;
-    for (let i = 0; i < byteSegment.length; i += 8) {
-      const byte = byteSegment.substr(i, 8);
-      total += parseInt(byte, 2);
+    const segmentLength = Math.min(8, byteSegment.length)
+    const maxValue = Math.pow(2, segmentLength) - 1;
+    const numBytes = (byteSegment.length / segmentLength) | 0;
+
+    for (let i = 0; i < byteSegment.length; i += segmentLength) {
+      const byte = byteSegment.substr(i, segmentLength);
+      total += (parseInt(byte, 2) / maxValue) * 255;
     }
 
     return (total / numBytes) | 0;

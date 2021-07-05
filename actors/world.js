@@ -168,17 +168,15 @@ export class World {
     return entity;
   }
 
-  hasEntityAt(x, y) {
-    const index = this.getIndexFromPosition(x, y);
+  hasEntityAtIndex(index) {
     const entity = this.getEntityAtIndex(index);
 
     return !!entity;
   }
 
-  hasEntityAtIndex(index) {
-    const entity = this.getEntityAtIndex(index);
-
-    return !!entity;
+  hasEntityAt(x, y) {
+    const index = this.getIndexFromPosition(x, y);
+    return this.hasEntityAtIndex(index);
   }
 
   getEntities() {

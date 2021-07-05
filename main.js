@@ -16,6 +16,9 @@ import { Renderer } from './connectors/renderer.js';
     > the two above counteract one another making it more likely a survival of the fittest thing.
       Too slow? You get eaten or starve due to new competitions
       Too fast? You die out of starvation due to burning up too much
+  Make the order of resolving entities in a generation either random (for now) or use a means to order them based on
+    speed or number of operations or something?
+    > This should create a more even playing field for all entities across the board.
 */
 
 

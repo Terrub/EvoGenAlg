@@ -43,14 +43,8 @@ const world = new World(...worldConfig);
 const renderer = new Renderer(display, world, size);
 
 function renderWorld() {
-  let entities;
-  if (Utils.isUndefined(entities) || entities.length < 1) {
-    // report("Starting new list of entities");
-    entities = world.getEntities().slice();
-
-    document.querySelector('[name="entity_count"]').value = entities.length;
-  }
-  world.parseEntityEvolution(entities);
+  document.querySelector('[name="entity_count"]').value = world.getEntities().length;
+  world.calcNextGeneration();
   renderer.renderCurrentState();
 }
 

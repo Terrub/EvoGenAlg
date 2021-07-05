@@ -230,8 +230,8 @@ export class World {
     const position = this.getPositionFromIndex(entity.index);
 
     for (let i = 0; i < genome.length; i += 16) {
-      const trait = genome.substr(i, 8);
-      const output = genome.substr(i + 8, 8);
+      const trait = World.getTraitFromGenomeAtIndex(genome, i);
+      const output = World.getOutputFromGenomeAtIndex(genome, i);
       const ground = this.getOctetAtIndex(entity.index);
 
       let index = 0;
@@ -299,6 +299,116 @@ export class World {
         const entity = new Entity(genome);
         this.addEntityAtIndex(entity, index);
         currentEntityIndex += 1;
+      }
+    }
+  }
+
+  static sortEntities(entities) {
+    // TODO: Use some way to sort entities sensibly.
+    //    > Try sorting by genome length for now?
+    entities.sort((a, b) => {
+      return a.genome.length - b.genome.length;
+    });
+
+    return entities;
+  }
+
+  static getCurrentActiveTraitForEntity(entity) {
+    const { genome, age } = entity;
+    const index = age % ((genome.length / 16) | 0);
+
+    return genome.substr(index, 8);
+  }
+
+  static getCurrentActiveOutputForEntity(entity) {
+    const { genome, age } = entity;
+    const index = age % ((genome.length / 16) | 0);
+
+    return genome.substr(index + 8, 8);
+  }
+
+  static getTraitFromGenomeAtIndex(genome, index) {
+    return genome.substr(index, 8);
+  }
+
+  static getOutputFromGenomeAtIndex(genome, index) {
+    return genome.substr(index + 8, 8);
+  }
+
+  getOutputIndicesFromPosition(x, y) {
+    return [
+      (y - 1) * this.width + x - 1, // Top Left
+      (y - 1) * this.width + x, // Top Centre
+      (y - 1) * this.width + x + 1, // Top Right
+      y * this.width + x - 1, // Mid Left
+      y * this.width + x + 1, // Mid Right
+      (y + 1) * this.width + x - 1, // Bottom Left
+      (y + 1) * this.width + x, // Bottom Centre
+      (y + 1) * this.width + x + 1, // Bottom Right
+    ];
+  }
+
+  getOutputIndicesFromIndex(index) {
+    const { x, y } = this.getPositionFromIndex(index);
+
+    return this.getOutputIndicesFromPosition(x, y);
+  }
+
+  applyOutputToGeneration(entity, output) {
+    const { index, genome } = entity;
+    const outputIndices = this.getOutputIndicesFromIndex(index);
+    const lenOutputIndices = outputIndices.length;
+
+    const randomisedOffset = Utils.generateRandomNumber(lenOutputIndices);
+    for (let i = 0; i < lenOutputIndices; i += 1) {
+      const randomisedIndex = (i + randomisedOffset) % lenOutputIndices;
+      const outputIndex = outputIndices[randomisedIndex];
+      const neighbour = this.getEntityAtIndex(outputIndex);
+
+      if (neighbour) {
+        this.killEntity(neighbour);
+      }
+
+      if (output[randomisedIndex] === '1' && this.entities.length < this.maxEntities) {
+        let offspringGenome;
+        if (neighbour && genome !== neighbour.genome) {
+          offspringGenome = World.combineGenomes(genome, neighbour.genome);
+        } else if ((Math.random() + this.chanceToMutate | 0) === 1) {
+          offspringGenome = World.mutateGenome(genome);
+        } else {
+          offspringGenome = genome;
+        }
+
+        const offspring = new Entity(offspringGenome);
+        this.addEntityAtIndex(offspring, outputIndex);
+      }
+    }
+  }
+
+  calcNextGeneration() {
+    World.sortEntities(this.entities);
+    for (const entity of this.entities) {
+      const { index } = entity;
+      const trait = World.getCurrentActiveTraitForEntity(entity);
+      const ground = this.getOctetAtIndex(index);
+      if (World.traitMatchesGround(trait, ground)) {
+        const output = World.getCurrentActiveOutputForEntity(entity);
+        this.applyOutputToGeneration(entity, output);
+      }
+
+      entity.increaseAge();
+
+      if (this.entityShouldDie(entity)) {
+        this.killEntity(entity);
+      }
+    }
+
+    while (this.entities.length < this.maxEntities) {
+      let index = Utils.generateRandomNumber(this.grid.length);
+      if (!this.hasEntityAtIndex(index)) {
+        const genome = this.createGenome();
+        const entity = new Entity(genome);
+        this.addEntityAtIndex(entity, index);
       }
     }
   }

@@ -126,9 +126,7 @@ export class Renderer {
   }
 
   renderCurrentState() {
-    const { display } = this;
-    const { world } = this;
-    const { size } = this;
+    const { display, world, size } = this;
 
     display.clear();
 
@@ -136,12 +134,12 @@ export class Renderer {
     for (let index = 0; index < grid.length; index += 1) {
       const cell = grid[index];
       if (cell === 1) {
-        const position = world.getPositionFromIndex(index);
         const entity = world.getEntityAtIndex(index);
         if (entity) {
           const { genome } = entity;
           const color = this.colorRenderer(genome);
-          display.drawRect(position.x * size, position.y * size, size, size, color);
+          const { x, y } = world.getPositionFromIndex(index);
+          display.drawRect(x * size, y * size, size, size, color);
         }
       }
     }

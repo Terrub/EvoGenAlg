@@ -307,7 +307,7 @@ export class World {
     // TODO: Use some way to sort entities sensibly.
     //    > Try sorting by genome length for now?
     entities.sort((a, b) => {
-      return a.genome.length - b.genome.length;
+      return b.genome.length - a.genome.length;
     });
 
     return entities;
@@ -414,9 +414,8 @@ export class World {
     }
   }
 
-  calcNextGeneration() {
-    World.sortEntities(this.entities);
-    for (const entity of this.entities) {
+  calcNextGeneration(entities) {
+    for (const entity of entities) {
       const { index } = entity;
       const trait = World.getCurrentActiveTraitForEntity(entity);
       // const trait = World.getAltActiveTraitForEntity(entity);
@@ -433,10 +432,13 @@ export class World {
         this.killEntity(entity);
       }
     }
+  }
 
-    while (this.entities.length < this.maxEntities) {
+  spawnNewEntities() {
+    let numEmptySpots = this.maxEntities - this.entities.length;
+    for (numEmptySpots; numEmptySpots > 0; numEmptySpots -= 1) {
       let index = Utils.generateRandomNumber(this.grid.length);
-      if (!this.hasEntityAtIndex(index)) {
+      if (!this.hasEntityAtIndex(index) && ((Math.random() + 0.5) | 0) === 1) {
         const genome = this.createGenome();
         const entity = new Entity(genome);
         this.addEntityAtIndex(entity, index);

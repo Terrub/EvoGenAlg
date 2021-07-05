@@ -63,18 +63,20 @@
 <body>
     <canvas id="test_canvas"></canvas>
     <div>
-        <label>
-            Entities: <input type="number" name="entity_count" value="0" min="2" pattern="^\d+$" />
-        </label>
-        <button id="btn_start">start</button>
-        <button id="btn_stop" onclick="mainloop.stop()">stop</button>
-        <button id="btn_reset" onclick="mainloop.reset()">reset</button>
-        <button id="btn_colors" onclick="renderer.toggleColorRenderer()">colors</button>
+        <button id="btn_start">Start</button>
+        <button id="btn_stop">Stop</button>
+        <button id="btn_speed_up">Faster</button>
+        <button id="btn_speed_down">Slower</button>
+        <button id="btn_max_ent_up">More</button>
+        <button id="btn_max_ent_down">Fewer</button>
+        <button id="btn_colors">Colors</button>
         <!-- FPS: <span name="frame_rate"></span> -->
         <label>
-            Max: <span name="max_gnome">0</span>
-            Min: <span name="min_gnome">0</span>
-            Avg: <span name="avg_gnome">0</span>
+            Entities: <span id="entity_count">0</span>
+            Generation: <span id="generation_count">0</span>
+            Max: <span id="max_gnome">0</span>
+            Min: <span id="min_gnome">0</span>
+            Avg: <span id="avg_gnome">0</span>
         </label>
     </div>
 </body>

@@ -144,10 +144,10 @@ export class Renderer {
       }
     }
 
-    const stats = world.getGenomeStats();
-    document.querySelector('[name="max_gnome"]').innerHTML = stats.max;
-    document.querySelector('[name="min_gnome"]').innerHTML = stats.min;
-    document.querySelector('[name="avg_gnome"]').innerHTML = stats.avg;
+    const { max, min, avg } = world.getGenomeStats();
+    document.getElementById('max_gnome').textContent = max;
+    document.getElementById('min_gnome').textContent = min;
+    document.getElementById('avg_gnome').textContent = avg;
   }
 
   toggleColorRenderer() {

@@ -58,11 +58,11 @@ export class World {
 
   static mutateGenome(genome) {
     let mutatedGenome = '';
-    const addCount = (genome.match(/00/g) || []).length;
+    const addCount = (genome.match(/01/g) || []).length;
     const addBias = addCount / genome.length;
-    const subCount = (genome.match(/11/g) || []).length;
+    const subCount = (genome.match(/00/g) || []).length;
     const subBias = subCount / genome.length;
-    const trslCount = (genome.match(/01/g) || []).length;
+    const trslCount = (genome.match(/11/g) || []).length;
     const trslBias = trslCount / genome.length;
 
     for (let i = 0; i < genome.length; i += 1) {
@@ -111,7 +111,9 @@ export class World {
   }
 
   getIndexFromPosition(x, y) {
-    return y * this.width + x;
+    const { width, height } = this;
+
+    return ((height + y) % height) * width + (width + x) % width;
   }
 
   getPositionFromIndex(index) {
@@ -198,10 +200,8 @@ export class World {
 
   getGridValueAt(x, y) {
     let value = 0;
-    if (this.isPositionInGrid(x, y)) {
-      const index = this.getIndexFromPosition(x, y);
-      value = this.getGridValueAtIndex(index);
-    }
+    const index = this.getIndexFromPosition(x, y);
+    value = this.getGridValueAtIndex(index);
 
     return value;
   }
@@ -349,7 +349,7 @@ export class World {
     return genome.substr(index + 8, 8);
   }
 
-  getOutputIndicesFromPosition(x, y) {
+  getOutputIndicesFromPositionOld(x, y) {
     return [
       (y - 1) * this.width + x - 1, // Top Left
       (y - 1) * this.width + x, // Top Centre
@@ -361,6 +361,21 @@ export class World {
       (y + 1) * this.width + x + 1, // Bottom Right
     ];
   }
+
+  getOutputIndicesFromPosition(x, y) {
+    const { height, width } = this;
+
+    return [
+      (((height + y - 1) % height) * width) + ((width + x) - 1) % width, // Top Left
+      (((height + y - 1) % height) * width) + (width + x) % width, // Top Centre
+      (((height + y - 1) % height) * width) + ((width + x) + 1) % width, // Top Right
+      (((height + y) % height) * width) + ((width + x) - 1) % width, // Mid Left
+      (((height + y) % height) * width) + ((width + x) + 1) % width, // Mid Right
+      (((height + y + 1) % height) * width) + ((width + x) - 1) % width, // Bottom Left
+      (((height + y + 1) % height) * width) + (width + x) % width, // Bottom Centre
+      (((height + y + 1) % height) * width) + ((width + x) + 1) % width, // Bottom Right
+    ];
+  };
 
   getOutputIndicesFromIndex(index) {
     const { x, y } = this.getPositionFromIndex(index);

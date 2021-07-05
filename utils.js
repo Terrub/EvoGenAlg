@@ -153,8 +153,8 @@ export class Utils {
     let max = pMax;
     let min = pMin;
 
-    if (typeof max === 'undefined') { max = 100; }
-    if (typeof min === 'undefined') { min = 0; }
+    if (!Utils.isInteger(max)) { max = 100; }
+    if (!Utils.isInteger(min)) { min = 0; }
     const randomNumber = Math.floor((Math.random() * (max - min)) + min);
 
     return randomNumber;

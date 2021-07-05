@@ -152,17 +152,9 @@ export class World {
 
   killEntity(entity) {
     const entityIndex = entity.index;
-
-    for (let i = 0; i < this.entities.length; i += 1) {
-      const entity = this.entities[i];
-      if (entity.index === entityIndex) {
-        this.entities.splice(i, 1);
-      }
-    }
-
     delete this.entityPositions[entityIndex];
-
     this.setGridValueAtIndex(0, entityIndex);
+    this.entities.splice(this.entities.indexOf(entity), 1);
   }
 
   getEntityAtIndex(index) {

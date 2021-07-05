@@ -138,12 +138,11 @@ export class World {
     const entity = pEntity;
 
     entity.index = index;
-    if (index >= 0 && index < (this.width * this.height)) {
+    if (index >= 0 && index < this.grid.length) {
       this.entityPositions[index] = entity;
       this.entities.push(entity);
+      this.setGridValueAtIndex(1, index);
     }
-
-    this.setGridValueAtIndex(1, index);
   }
 
   addEntityAtPosition(entity, x, y) {

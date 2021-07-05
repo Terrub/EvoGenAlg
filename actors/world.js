@@ -210,8 +210,10 @@ export class World {
     this.grid[index] = value;
   }
 
-  getOctetAt(x, y) {
+  getOctetAtIndex(index) {
+    const { x, y } = this.getPositionFromIndex(index);
     let octet = '';
+
     for (let ox = -1; ox <= 1; ox += 1) {
       for (let oy = -1; oy <= 1; oy += 1) {
         if (!(ox === 0 && oy === 0)) {
@@ -230,7 +232,7 @@ export class World {
     for (let i = 0; i < genome.length; i += 16) {
       const trait = genome.substr(i, 8);
       const output = genome.substr(i + 8, 8);
-      const ground = this.getOctetAt(position.x, position.y);
+      const ground = this.getOctetAtIndex(entity.index);
 
       let index = 0;
       if (World.traitMatchesGround(trait, ground)) {

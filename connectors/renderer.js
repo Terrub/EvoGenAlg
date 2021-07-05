@@ -13,9 +13,9 @@ export class Renderer {
   currentColourRenderIndex = 0;
 
   colorRenderers = [
+    Renderer.getColorFromTraitCountsSin,
     Renderer.getColorFromSegmentByteAverage,
     // Renderer.getColorFromTraitCountsLog,
-    Renderer.getColorFromTraitCountsSin,
   ];
 
   constructor(display, world, size) {

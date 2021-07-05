@@ -317,12 +317,26 @@ export class World {
     const { genome, age } = entity;
     const index = age % ((genome.length / 16) | 0);
 
-    return genome.substr(index, 8);
+    return genome.substr((index * 16), 8);
   }
 
   static getCurrentActiveOutputForEntity(entity) {
     const { genome, age } = entity;
     const index = age % ((genome.length / 16) | 0);
+
+    return genome.substr((index * 16) + 8, 8);
+  }
+
+  static getAltActiveTraitForEntity(entity) {
+    const { genome, age } = entity;
+    const index = age % (genome.length - 16);
+
+    return genome.substr(index, 8);
+  }
+
+  static getAltActiveOutputForEntity(entity) {
+    const { genome, age } = entity;
+    const index = age % (genome.length - 16);
 
     return genome.substr(index + 8, 8);
   }
@@ -390,9 +404,11 @@ export class World {
     for (const entity of this.entities) {
       const { index } = entity;
       const trait = World.getCurrentActiveTraitForEntity(entity);
+      // const trait = World.getAltActiveTraitForEntity(entity);
       const ground = this.getOctetAtIndex(index);
       if (World.traitMatchesGround(trait, ground)) {
         const output = World.getCurrentActiveOutputForEntity(entity);
+        // const output = World.getAltActiveOutputForEntity(entity);
         this.applyOutputToGeneration(entity, output);
       }
 

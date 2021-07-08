@@ -349,6 +349,54 @@ export class World {
     return genome.substr(index + 8, 8);
   }
 
+  static visualiseGenomeInConsole(genome) {
+    const cOn = 'lightgreen';
+    const cOff = 'gray';
+    const cCOn = `color:${cOn}`;
+    /* FORMAT
+      @ @ @     @ @ @
+      @ @ @  >  @ @ @
+      @ @ @     @ @ @
+    */
+    const c = [];
+    const displayStrings = [];
+
+    for (let iSeg = 0; iSeg < genome.length; iSeg += 16) {
+      // Top row
+      c.push(`color:${genome[iSeg + 0] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 1] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 2] === '1' ? cOn : cOff}`);
+
+      c.push(`color:${genome[iSeg + 8] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 9] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 10] === '1' ? cOn : cOff}`);
+
+      // Middle row
+      c.push(`color:${genome[iSeg + 3] === '1' ? cOn : cOff}`);
+      c.push(`color:${cOn}`);
+      c.push(`color:${genome[iSeg + 4] === '1' ? cOn : cOff}`);
+
+      // ... with arrow
+      c.push(`color:${cOff}`);
+
+      c.push(`color:${genome[iSeg + 11] === '1' ? cOn : cOff}`);
+      c.push(`color:${cOn}`);
+      c.push(`color:${genome[iSeg + 12] === '1' ? cOn : cOff}`);
+
+      // Bottom row
+      c.push(`color:${genome[iSeg + 5] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 6] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 7] === '1' ? cOn : cOff}`);
+
+      c.push(`color:${genome[iSeg + 13] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 14] === '1' ? cOn : cOff}`);
+      c.push(`color:${genome[iSeg + 15] === '1' ? cOn : cOff}`);
+
+      displayStrings.push('%c@ %c@ %c@     %c@ %c@ %c@\n%c@ %c@ %c@  %c>  %c@ %c@ %c@\n%c@ %c@ %c@     %c@ %c@ %c@');
+    }
+    console.log(displayStrings.join('\n\n'), ...c);
+  }
+
   getOutputIndicesFromPositionOld(x, y) {
     return [
       (y - 1) * this.width + x - 1, // Top Left

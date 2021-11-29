@@ -84,8 +84,8 @@ function renderWorld() {
   world.spawnNewEntities();
   renderer.renderCurrentState();
 
-  document.getElementById('btn_speed_up').disabled = (entityUpdateAmount + entityUpdateAmountStepSize > world.maxEntities);
-  document.getElementById('btn_speed_down').disabled = (entityUpdateAmount - entityUpdateAmountStepSize < 1);
+  // document.getElementById('btn_speed_up').disabled = (entityUpdateAmount + entityUpdateAmountStepSize > world.maxEntities);
+  // document.getElementById('btn_speed_down').disabled = (entityUpdateAmount - entityUpdateAmountStepSize < 1);
   document.getElementById('entity_count').textContent = world.getNumLivingEntities();
   document.getElementById('generation_count').textContent = currentGeneration;
 }
@@ -95,26 +95,26 @@ const mainloop = createMainloop(renderWorld);
 document.getElementById('btn_next').onclick = () => renderWorld();
 document.getElementById('btn_start').onclick = () => mainloop.start();
 document.getElementById('btn_stop').onclick = () => mainloop.stop();
-document.getElementById('btn_speed_up').onclick = () => {
-  if (entityUpdateAmount + entityUpdateAmountStepSize <= world.maxEntities) {
-    entityUpdateAmount += entityUpdateAmountStepSize;
-  }
-};
-document.getElementById('btn_speed_down').onclick = () => {
-  if (entityUpdateAmount - entityUpdateAmountStepSize > 1) {
-    entityUpdateAmount -= entityUpdateAmountStepSize;
-  }
-};
-document.getElementById('btn_max_ent_up').onclick = () => {
-  if (world.maxEntities + 100 <= world.numCells) {
-    world.maxEntities += 100;
-  }
-};
-document.getElementById('btn_max_ent_down').onclick = () => {
-  if (world.maxEntities > 100) {
-    world.maxEntities -= 100;
-  }
-};
+// document.getElementById('btn_speed_up').onclick = () => {
+//   if (entityUpdateAmount + entityUpdateAmountStepSize <= world.maxEntities) {
+//     entityUpdateAmount += entityUpdateAmountStepSize;
+//   }
+// };
+// document.getElementById('btn_speed_down').onclick = () => {
+//   if (entityUpdateAmount - entityUpdateAmountStepSize > 1) {
+//     entityUpdateAmount -= entityUpdateAmountStepSize;
+//   }
+// };
+// document.getElementById('btn_max_ent_up').onclick = () => {
+//   if (world.maxEntities + 100 <= world.numCells) {
+//     world.maxEntities += 100;
+//   }
+// };
+// document.getElementById('btn_max_ent_down').onclick = () => {
+//   if (world.maxEntities > 100) {
+//     world.maxEntities -= 100;
+//   }
+// };
 document.getElementById('btn_colors').onclick = () => renderer.toggleColorRenderer();
 
 mainloop.start();

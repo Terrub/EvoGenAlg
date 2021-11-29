@@ -8,6 +8,7 @@
         "jsx-a11y/href-no-hash": 0,
         "no-await-in-loop": 0,
         "no-shadow": 0,
+        "import/extensions": [0, "always"],
         "import/no-extraneous-dependencies": 0,
         "import/prefer-default-export": 0,
         "no-underscore-dangle": 0,
@@ -17,8 +18,7 @@
     "globals": {
         "__ROOT__": true,
         "document": true,
-        "window": true,
-        "$": true
+        "window": true
     },
     "env": {
         "browser": true

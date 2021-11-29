@@ -13,3 +13,6 @@ app/assets/js/load-twitter.js
 app/assets/js/load-gtm.js
 public/assets/admin/*
 resources/js/*
+
+*_old.js
+workfile*

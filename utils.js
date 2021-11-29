@@ -108,6 +108,13 @@ export class Utils {
     return (yKeysInX && valuesEqual);
   }
 
+  static shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
   static faultOnError(err) {
     const errBody = document.createElement('body');
     errBody.style.backgroundColor = '#cc3333';

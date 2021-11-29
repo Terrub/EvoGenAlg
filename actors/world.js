@@ -3,14 +3,14 @@
  */
 
 import { Utils } from '../utils.js';
-import { Entity } from '../actors/entity.js';
+import { Entity } from './entity.js';
 
 export class World {
-  grid;
-
   width;
 
   height;
+
+  numCells;
 
   chanceToMutate;
 
@@ -20,36 +20,25 @@ export class World {
 
   minNumTraits;
 
-  maxEntityAge = 10000;
-
-  entities = [];
+  maxEntityAge = 200;
 
   entityPositions = {};
 
-  constructor(width, height,
-    entitiesStartAmount, maxEntities,
-    maxNumTraits, minNumTraits, chanceToMutate) {
+  entitiesList;
+
+  estimatedNumEntities;
+
+  constructor(width, height, maxEntities, maxNumTraits, minNumTraits, chanceToMutate, pEntities) {
     this.width = width;
     this.height = height;
-    this.maxEntities = maxEntities;
     this.maxNumTraits = maxNumTraits;
     this.minNumTraits = minNumTraits;
     this.chanceToMutate = chanceToMutate;
-
-    // Create the random world grid
-    this.grid = new Uint8Array(width * height);
-
-    // for (let i = 0; i < grid.length; i += 1) {
-    //     const value = Math.random() + 0.05 | 0;
-    //     grid[i] = value;
-    // }
-
-    for (let i = 0; i < entitiesStartAmount; i += 1) {
-      const x = (Math.random() * width) | 0;
-      const y = (Math.random() * height) | 0;
-      const index = (x) + (y * width);
-      this.grid[index] = 1;
-    }
+    this.numCells = this.width * this.height;
+    // this.maxEntities = maxEntities;
+    this.maxEntities = this.numCells;
+    this.entitiesList = pEntities;
+    this.estimatedNumEntities = maxEntities;
   }
 
   static getRandomNibble() {
@@ -81,6 +70,26 @@ export class World {
     return mutatedGenome;
   }
 
+  static mutateGenomeV2(genome) {
+    let mutatedGenome = '';
+    let mutationEffect = 0;
+
+    for (let i = 0; i < genome.length; i += 1) {
+      if (((Math.random() + this.chanceToMutate) | 0) === 1) {
+        mutationEffect += 1;
+      }
+
+      if (((Math.random() + this.chanceToMutate) | 0) === 1) {
+        i += mutationEffect * (-1 * ((Math.random() + 0.5) | 0));
+        mutationEffect = 0;
+      }
+
+      mutatedGenome += genome[Math.max(i, 0)];
+    }
+
+    return mutatedGenome;
+  }
+
   static combineGenomes(a, b) {
     let newGenome = '';
     let cursorA = 0;
@@ -107,13 +116,10 @@ export class World {
   }
 
   entityShouldDie(entity) {
-    return (Math.random() + (entity.age / this.maxEntityAge) | 0 === 1);
-  }
+    const tooOld = (Math.random() + (entity.age / this.maxEntityAge) | 0 === 1);
+    const starved = entity.energy < 1;
 
-  getIndexFromPosition(x, y) {
-    const { width, height } = this;
-
-    return ((height + y) % height) * width + (width + x) % width;
+    return (tooOld || starved);
   }
 
   getPositionFromIndex(index) {
@@ -123,9 +129,7 @@ export class World {
     };
   }
 
-  createGenome() {
-    // create between [1,8) pairs of segments
-    const numTraits = 2 * Utils.generateRandomNumber(this.maxNumTraits, this.minNumTraits);
+  static createGenome(numTraits) {
     let genome = '';
 
     // Seed the empty genome with random octets
@@ -136,181 +140,81 @@ export class World {
     return genome;
   }
 
-  addEntityAtIndex(pEntity, index) {
-    const entity = pEntity;
-
-    entity.index = index;
-    if (index >= 0 && index < this.grid.length) {
-      this.entityPositions[index] = entity;
-      this.entities.push(entity);
-      this.setGridValueAtIndex(1, index);
-    }
+  addEntityAtIndex(entity, index) {
+    this.entitiesList[index] = entity;
   }
 
-  addEntityAtPosition(entity, x, y) {
-    const index = this.getIndexFromPosition(x, y);
-    this.addEntityAtIndex(entity, index);
+  executeEntityAtIndex(index) {
+    delete this.entitiesList[index];
   }
 
-  killEntity(entity) {
-    const entityIndex = entity.index;
-    delete this.entityPositions[entityIndex];
-    this.setGridValueAtIndex(0, entityIndex);
-    this.entities.splice(this.entities.indexOf(entity), 1);
+  killOffEntity(entity) {
+    entity.state = Entity.STATE_DEAD;
   }
 
-  getEntityAtIndex(index) {
-    return this.entityPositions[index];
+  getEntitiesList() {
+    return this.entitiesList;
   }
 
-  getEntityAt(x, y) {
-    const index = this.getIndexFromPosition(x, y);
-    const entity = this.getEntityAtIndex(index);
+  getNumLivingEntities() {
+    // return this.entitiesList.reduce((numLivingEntities, entity) => {
+    //   if (Utils.isDefined(entity) && entity.state === Entity.STATE_ALIVE) {
+    //     return numLivingEntities + 1;
+    //   }
 
-    return entity;
+    //   return numLivingEntities;
+    // }, 0);
+    return this.estimatedNumEntities;
   }
 
-  hasEntityAtIndex(index) {
-    const entity = this.getEntityAtIndex(index);
+  getSurroundingIndicesForIndex(i) {
+    const w = this.width;
+    const h = this.height;
 
-    return !!entity;
-  }
-
-  hasEntityAt(x, y) {
-    const index = this.getIndexFromPosition(x, y);
-    return this.hasEntityAtIndex(index);
-  }
-
-  getEntities() {
-    return this.entities;
-  }
-
-  getGrid() {
-    return this.grid;
-  }
-
-  isPositionInGrid(x, y) {
-    const index = this.getIndexFromPosition(x, y);
-    return (0 <= index && index < this.grid.length);
-  }
-
-  getGridValueAtIndex(index) {
-    return this.grid[index];
-  }
-
-  getGridValueAt(x, y) {
-    let value = 0;
-    const index = this.getIndexFromPosition(x, y);
-    value = this.getGridValueAtIndex(index);
-
-    return value;
-  }
-
-  setGridValueAtIndex(value, index) {
-    this.grid[index] = value;
+    return [
+      (((h + (i / w | 0) - 1) % h) * w) + (w + (i % w) - 1) % w, // Top Left
+      (((h + (i / w | 0) - 1) % h) * w) + (w + (i % w)) % w, // Top Centre
+      (((h + (i / w | 0) - 1) % h) * w) + (w + (i % w) + 1) % w, // Top Right
+      (((h + (i / w | 0)) % h) * w) + (w + (i % w) - 1) % w, // Mid Left
+      (((h + (i / w | 0)) % h) * w) + (w + (i % w) + 1) % w, // Mid Right
+      (((h + (i / w | 0) + 1) % h) * w) + (w + (i % w) - 1) % w, // Bottom Left
+      (((h + (i / w | 0) + 1) % h) * w) + (w + (i % w)) % w, // Bottom Centre
+      (((h + (i / w | 0) + 1) % h) * w) + (w + (i % w) + 1) % w, // Bottom Right
+    ]
   }
 
   getOctetAtIndex(index) {
-    const { x, y } = this.getPositionFromIndex(index);
+    const indices = this.getSurroundingIndicesForIndex(index);
     let octet = '';
-
-    for (let ox = -1; ox <= 1; ox += 1) {
-      for (let oy = -1; oy <= 1; oy += 1) {
-        if (!(ox === 0 && oy === 0)) {
-          octet += this.getGridValueAt(x + ox, y + oy);
-        }
+    indices.forEach((index) => {
+      let nibble = 0;
+      const entity = this.entitiesList[index];
+      if (Utils.isDefined(entity)) {
+        nibble = 1;
       }
-    }
+      octet += nibble;
+    });
 
     return octet;
   }
 
-  parseEntityOutput(entity) {
-    const { genome } = entity;
-    const position = this.getPositionFromIndex(entity.index);
+  sortEntitiesByGenomeLength(entities) {
+    const listOfIndices = [];
+    const listToOrder = [];
 
-    for (let i = 0; i < genome.length; i += 16) {
-      const trait = World.getTraitFromGenomeAtIndex(genome, i);
-      const output = World.getOutputFromGenomeAtIndex(genome, i);
-      const ground = this.getOctetAtIndex(entity.index);
-
-      let index = 0;
-      if (World.traitMatchesGround(trait, ground)) {
-        for (let ox = -1; ox <= 1; ox += 1) {
-          for (let oy = -1; oy <= 1; oy += 1) {
-            if (!(ox === 0 && oy === 0)) {
-              const offsetX = position.x + ox;
-              const offsetY = position.y + oy;
-              const outputNibble = output[index];
-
-              const neighbour = this.getEntityAt(offsetX, offsetY);
-
-              if (neighbour) {
-                this.killEntity(neighbour);
-              }
-
-              if (outputNibble === '1' && this.getEntities().length < this.maxEntities) {
-                let offspringGenome;
-                if (neighbour && genome !== neighbour.genome) {
-                  offspringGenome = World.combineGenomes(genome, neighbour.genome);
-                } else if ((Math.random() + this.chanceToMutate | 0) === 1) {
-                  offspringGenome = World.mutateGenome(genome);
-                } else {
-                  offspringGenome = genome;
-                }
-
-                const entity = new Entity(offspringGenome);
-                this.addEntityAtPosition(entity, offsetX, offsetY);
-              }
-
-              index += 1;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // TODO: We shouldn't be fixing stuff in place. Read the previous generation first,
-  //      Then work out the next generation,
-  //      Then kill off whatever dies this generation.
-  parseEntityEvolution(entities) {
-    let entity = entities.shift();
-    let currentEntityIndex = 0;
-    const numEntities = entities.length;
-
-    while (Utils.isDefined(entity) && currentEntityIndex < numEntities) {
-      entity.increaseAge();
-
-      this.parseEntityOutput(entity);
-
-      if (this.entityShouldDie(entity)) {
-        this.killEntity(entity);
-      }
-
-      entity = entities.shift();
-      currentEntityIndex += 1;
-    }
-
-    while (currentEntityIndex <= this.maxEntities) {
-      let index = Utils.generateRandomNumber(0, this.grid.length - 1);
-      if (!this.hasEntityAtIndex(index)) {
-        const genome = this.createGenome();
-        const entity = new Entity(genome);
-        this.addEntityAtIndex(entity, index);
-        currentEntityIndex += 1;
-      }
-    }
-  }
-
-  static sortEntities(entities) {
-    // TODO: Use some way to sort entities sensibly.
-    //    > Try sorting by genome length for now?
-    entities.sort((a, b) => {
-      return b.genome.length - a.genome.length;
+    entities.forEach((entity, index) => {
+      // listToOrder.push([index, entity.genome]);
+      listToOrder.push([index, World.getCurrentActiveOutputForEntity(entity)]);
     });
 
-    return entities;
+    listToOrder.sort((a, b) => (a[1].match(/1/g) || []).length - (b[1].match(/1/g) || []).length);
+    listToOrder.forEach((entry) => {
+      listOfIndices.push(entry[0]);
+    });
+
+    this.estimatedNumEntities = listOfIndices.length;
+
+    return listOfIndices;
   }
 
   static getCurrentActiveTraitForEntity(entity) {
@@ -327,32 +231,10 @@ export class World {
     return genome.substr((index * 16) + 8, 8);
   }
 
-  static getAltActiveTraitForEntity(entity) {
-    const { genome, age } = entity;
-    const index = age % (genome.length - 16);
-
-    return genome.substr(index, 8);
-  }
-
-  static getAltActiveOutputForEntity(entity) {
-    const { genome, age } = entity;
-    const index = age % (genome.length - 16);
-
-    return genome.substr(index + 8, 8);
-  }
-
-  static getTraitFromGenomeAtIndex(genome, index) {
-    return genome.substr(index, 8);
-  }
-
-  static getOutputFromGenomeAtIndex(genome, index) {
-    return genome.substr(index + 8, 8);
-  }
-
+  // Assumed used
   static visualiseGenomeInConsole(genome) {
     const cOn = 'lightgreen';
     const cOff = 'gray';
-    const cCOn = `color:${cOn}`;
     /* FORMAT
       @ @ @     @ @ @
       @ @ @  >  @ @ @
@@ -394,104 +276,91 @@ export class World {
 
       displayStrings.push('%c@ %c@ %c@     %c@ %c@ %c@\n%c@ %c@ %c@  %c>  %c@ %c@ %c@\n%c@ %c@ %c@     %c@ %c@ %c@');
     }
+
+    // eslint-disable-next-line no-console
     console.log(displayStrings.join('\n\n'), ...c);
   }
 
-  getOutputIndicesFromPositionOld(x, y) {
-    return [
-      (y - 1) * this.width + x - 1, // Top Left
-      (y - 1) * this.width + x, // Top Centre
-      (y - 1) * this.width + x + 1, // Top Right
-      y * this.width + x - 1, // Mid Left
-      y * this.width + x + 1, // Mid Right
-      (y + 1) * this.width + x - 1, // Bottom Left
-      (y + 1) * this.width + x, // Bottom Centre
-      (y + 1) * this.width + x + 1, // Bottom Right
-    ];
-  }
+  applyOutputToGeneration(index, output, entity) {
+    const outputIndices = this.getSurroundingIndicesForIndex(index);
+    const spawnFactor = (output.match(/1/g) || []).length;
+    // Utils.shuffleArray(outputIndices);
+    outputIndices.forEach((outputIndex, i) => {
+      if (this.entityShouldDie(entity)) {
+        this.executeEntityAtIndex(index);
+      } else {
+        const neighbour = this.entitiesList[outputIndex];
 
-  getOutputIndicesFromPosition(x, y) {
-    const { height, width } = this;
-
-    return [
-      (((height + y - 1) % height) * width) + ((width + x) - 1) % width, // Top Left
-      (((height + y - 1) % height) * width) + (width + x) % width, // Top Centre
-      (((height + y - 1) % height) * width) + ((width + x) + 1) % width, // Top Right
-      (((height + y) % height) * width) + ((width + x) - 1) % width, // Mid Left
-      (((height + y) % height) * width) + ((width + x) + 1) % width, // Mid Right
-      (((height + y + 1) % height) * width) + ((width + x) - 1) % width, // Bottom Left
-      (((height + y + 1) % height) * width) + (width + x) % width, // Bottom Centre
-      (((height + y + 1) % height) * width) + ((width + x) + 1) % width, // Bottom Right
-    ];
-  };
-
-  getOutputIndicesFromIndex(index) {
-    const { x, y } = this.getPositionFromIndex(index);
-
-    return this.getOutputIndicesFromPosition(x, y);
-  }
-
-  applyOutputToGeneration(entity, output) {
-    const { index, genome } = entity;
-    const outputIndices = this.getOutputIndicesFromIndex(index);
-    const lenOutputIndices = outputIndices.length;
-
-    const randomisedOffset = Utils.generateRandomNumber(lenOutputIndices);
-    for (let i = 0; i < lenOutputIndices; i += 1) {
-      const randomisedIndex = (i + randomisedOffset) % lenOutputIndices;
-      const outputIndex = outputIndices[randomisedIndex];
-      const neighbour = this.getEntityAtIndex(outputIndex);
-
-      if (neighbour) {
-        this.killEntity(neighbour);
-      }
-
-      if (output[randomisedIndex] === '1' && this.entities.length < this.maxEntities) {
-        let offspringGenome;
-        if (neighbour && genome !== neighbour.genome) {
-          offspringGenome = World.combineGenomes(genome, neighbour.genome);
-        } else if ((Math.random() + this.chanceToMutate | 0) === 1) {
-          offspringGenome = World.mutateGenome(genome);
-        } else {
-          offspringGenome = genome;
+        let neighbourGenome;
+        if (Utils.isDefined(neighbour)) {
+          neighbourGenome = neighbour.genome;
+          if (output[i] === '0') {
+            entity.increaseEnergy((neighbour.energy - entity.energy) | 0);
+          }
+          // this.killOffEntity(neighbour);
+          this.executeEntityAtIndex(outputIndex);
         }
 
-        const offspring = new Entity(offspringGenome);
-        this.addEntityAtIndex(offspring, outputIndex);
+        if (output[i] === '1' && this.getNumLivingEntities() < this.maxEntities) {
+          const spawnCost = 9 - spawnFactor;
+          entity.reduceEnergy(spawnCost); // kids make you oooold...
+          let offspringGenome = entity.genome;
+          if (Utils.isDefined(neighbourGenome) && neighbourGenome !== entity.genome) {
+            offspringGenome = World.combineGenomes(entity.genome, neighbour.genome);
+          }
+
+          if ((Math.random() + this.chanceToMutate) | 0 === 1) {
+            // offspringGenome = World.mutateGenome(offspringGenome);
+            offspringGenome = World.mutateGenomeV2(offspringGenome);
+          }
+
+          const offspring = new Entity(offspringGenome, spawnCost);
+          this.addEntityAtIndex(offspring, outputIndex);
+        }
       }
-    }
+    });
   }
 
-  calcNextGeneration(entities) {
-    for (const entity of entities) {
-      const { index } = entity;
-      const trait = World.getCurrentActiveTraitForEntity(entity);
-      // const trait = World.getAltActiveTraitForEntity(entity);
-      const ground = this.getOctetAtIndex(index);
-      if (World.traitMatchesGround(trait, ground)) {
-        const output = World.getCurrentActiveOutputForEntity(entity);
-        // const output = World.getAltActiveOutputForEntity(entity);
-        this.applyOutputToGeneration(entity, output);
-      }
+  calculateNextGeneration(entityIndices) {
+    entityIndices.forEach((index) => {
+      const entity = this.entitiesList[index];
+      if (Utils.isDefined(entity)) {
+        entity.increaseAge();
+        
+        if (this.entityShouldDie(entity)) {
+          // this.killOffEntity(entity);
+          this.executeEntityAtIndex(index);
+        }
 
-      entity.increaseAge();
-
-      if (this.entityShouldDie(entity)) {
-        this.killEntity(entity);
+        const trait = World.getCurrentActiveTraitForEntity(entity);
+        const ground = this.getOctetAtIndex(index);
+        if (World.traitMatchesGround(trait, ground)) {
+          const output = World.getCurrentActiveOutputForEntity(entity);
+          this.applyOutputToGeneration(index, output, entity);
+        }
       }
-    }
+    });
   }
 
   spawnNewEntities() {
-    let numEmptySpots = this.maxEntities - this.entities.length;
+    let numEmptySpots = this.maxEntities - this.getNumLivingEntities();
     for (numEmptySpots; numEmptySpots > 0; numEmptySpots -= 1) {
-      let index = Utils.generateRandomNumber(this.grid.length);
-      if (!this.hasEntityAtIndex(index) && ((Math.random() + 0.5) | 0) === 1) {
-        const genome = this.createGenome();
+      const index = Utils.generateRandomNumber(this.numCells);
+      if (Utils.isUndefined(this.entitiesList[index]) && ((Math.random() + 0.001) | 0) === 1) {
+        const numTraits = 2 * Utils.generateRandomNumber(this.maxNumTraits, this.minNumTraits);
+        const genome = World.createGenome(numTraits);
         const entity = new Entity(genome);
         this.addEntityAtIndex(entity, index);
       }
     }
+  }
+
+  removeDeadEntities() {
+    this.entitiesList.forEach((entity, index) => {
+      if (entity.state === Entity.STATE_DEAD) {
+        this.executeEntityAtIndex(index);
+      }
+    });
   }
 
   getGenomeStats() {
@@ -500,21 +369,22 @@ export class World {
     let maxGnome;
     let minGnome;
 
-    for (let i = 0; i < this.entities.length; i += 1) {
-      lenGnome = this.entities[i].genome.length;
-      if (maxGnome === undefined || maxGnome < lenGnome) {
+    this.entitiesList.forEach((entity) => {
+      lenGnome = entity.genome.length;
+      if (Utils.isUndefined(maxGnome) || maxGnome < lenGnome) {
         maxGnome = lenGnome;
       }
-      if (minGnome === undefined || minGnome > lenGnome) {
+      if (Utils.isUndefined(minGnome) || minGnome > lenGnome) {
         minGnome = lenGnome;
       }
+
       avgGnome += lenGnome;
-    }
+    });
 
     return {
       max: maxGnome,
       min: minGnome,
-      avg: (avgGnome / this.entities.length) | 0,
+      avg: (avgGnome / this.getNumLivingEntities()) | 0,
     };
   }
 }

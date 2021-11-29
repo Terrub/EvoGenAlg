@@ -1,6 +1,6 @@
-import { Utils } from '../utils';
+import { Utils } from '../utils.js';
 
-export const ropBotTestRunner = (function ropBotTestRunnerConstructor() {
+export const TestBot = (function TestBotConstructor() {
   let result;
   let conclusion;
   let color;
@@ -12,7 +12,7 @@ export const ropBotTestRunner = (function ropBotTestRunnerConstructor() {
 
   function postResults() {
     Utils.report(
-      'RopBot: %c%s %c| %cExpectation: %o %c| %cResult: %o',
+      'TESTBOT: %c%s %c| %cExpectation: %o %c| %cResult: %o',
       color, statement,
       'color: yellow', 'color: gray', expectation,
       'color: yellow', 'color: gray', result,
@@ -88,10 +88,10 @@ export const ropBotTestRunner = (function ropBotTestRunnerConstructor() {
     try {
       result = experiment();
     } catch (error) {
-      result = error;
+      result = error.name;
     }
 
-    if (result !== expectation) {
+    if (result === expectation) {
       conclusion = true;
       color = 'color: green';
     }

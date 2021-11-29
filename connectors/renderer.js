@@ -1,3 +1,6 @@
+import { Entity } from "../actors/entity.js";
+import { Utils } from "../utils.js";
+
 /* eslint
     no-bitwise: ["error", { "allow": ["|", "^"] }]
  */
@@ -14,8 +17,8 @@ export class Renderer {
 
   colorRenderers = [
     Renderer.getColorFromTraitCountsSin,
-    Renderer.getColorFromSegmentByteAverage,
     // Renderer.getColorFromTraitCountsLog,
+    Renderer.getColorFromSegmentByteAverage,
   ];
 
   constructor(display, world, size) {
@@ -28,8 +31,8 @@ export class Renderer {
 
   static getByteAverage(byteSegment) {
     let total = 0;
-    const segmentLength = Math.min(8, byteSegment.length)
-    const maxValue = Math.pow(2, segmentLength) - 1;
+    const segmentLength = Math.min(8, byteSegment.length);
+    const maxValue = segmentLength ** 2 - 1;
     const numBytes = (byteSegment.length / segmentLength) | 0;
 
     for (let i = 0; i < byteSegment.length; i += segmentLength) {
@@ -130,19 +133,14 @@ export class Renderer {
 
     display.clear();
 
-    const grid = world.getGrid();
-    for (let index = 0; index < grid.length; index += 1) {
-      const cell = grid[index];
-      if (cell === 1) {
-        const entity = world.getEntityAtIndex(index);
-        if (entity) {
-          const { genome } = entity;
-          const color = this.colorRenderer(genome);
-          const { x, y } = world.getPositionFromIndex(index);
-          display.drawRect(x * size, y * size, size, size, color);
-        }
+    world.getEntitiesList().forEach((entity, index) => {
+      if (entity.state === Entity.STATE_ALIVE) {
+        const { genome } = entity;
+        const color = this.colorRenderer(genome);
+        const { x, y } = world.getPositionFromIndex(index);
+        display.drawRect(x * size, y * size, size, size, color);
       }
-    }
+    });
 
     const { max, min, avg } = world.getGenomeStats();
     document.getElementById('max_gnome').textContent = max;

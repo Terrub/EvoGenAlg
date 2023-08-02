@@ -1,4 +1,4 @@
-import { Utils } from '../utils.js';
+import { Utils } from "../utils.js";
 
 // TODO: See if we can turn this into a class after all.
 /*
@@ -12,13 +12,15 @@ import { Utils } from '../utils.js';
  */
 export function createMainloop(frameRender) {
   if (!Utils.isFunction(frameRender)) {
-    Utils.reportUsageError('Usage: createMainloop(frameRender: function');
+    Utils.reportUsageError("Usage: createMainloop(frameRender: function");
   }
 
   let animating = false;
 
   function tic() {
-    if (animating !== true) { return; }
+    if (animating !== true) {
+      return;
+    }
 
     frameRender();
 
@@ -27,14 +29,16 @@ export function createMainloop(frameRender) {
 
   const protoMainloop = {
     start: function start() {
-      if (animating === true) { return; }
+      if (animating === true) {
+        return;
+      }
       animating = true;
-      Utils.report('Animation started');
+      Utils.report("Animation started");
       tic();
     },
     stop: function stop() {
       animating = false;
-      Utils.report('Animation stopped');
+      Utils.report("Animation stopped");
     },
     reset: function reset() {},
   };

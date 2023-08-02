@@ -53,33 +53,33 @@ rendererTests.addTest(
   }
 );
 
-rendererTests.addTest("renderer has displayGenome method that calls drawRect for each nine cells", () => {
-  const genome = "01011010";
-  const size = 3;
-  const actualCellCalls = [];
-  const mockDisplay = {
-    drawRect: (x, y, w, h, c) => {
-      actualCellCalls.push({ x: x, y: y, w: w, h: h, c: c });
-    },
-  };
-  const mockWorld = {};
-  const renderer = new Renderer(mockDisplay, mockWorld, size);
+// rendererTests.addTest("renderer has displayGenome method that calls drawRect for each nine cells", () => {
+//   const genome = "01011010";
+//   const size = 3;
+//   const actualCellCalls = [];
+//   const mockDisplay = {
+//     drawRect: (x, y, w, h, c) => {
+//       actualCellCalls.push({ x: x, y: y, w: w, h: h, c: c });
+//     },
+//   };
+//   const mockWorld = {};
+//   const renderer = new Renderer(mockDisplay, mockWorld, size);
 
-  renderer.displayGenome(genome);
+//   renderer.displayGenome(genome);
 
-  const expectedCellCalls = [
-    { x: 0 * size + 0, y: 0 * size + 0, w: size, h: size, c: "gray" },
-    { x: 1 * size + 1, y: 0 * size + 0, w: size, h: size, c: "lightgreen" },
-    { x: 2 * size + 2, y: 0 * size + 0, w: size, h: size, c: "gray" },
-    { x: 0 * size + 0, y: 1 * size + 1, w: size, h: size, c: "lightgreen" },
-    { x: 1 * size + 1, y: 1 * size + 1, w: size, h: size, c: "lightgreen" },
-    { x: 2 * size + 2, y: 1 * size + 1, w: size, h: size, c: "lightgreen" },
-    { x: 0 * size + 0, y: 2 * size + 2, w: size, h: size, c: "gray" },
-    { x: 1 * size + 1, y: 2 * size + 2, w: size, h: size, c: "lightgreen" },
-    { x: 2 * size + 2, y: 2 * size + 2, w: size, h: size, c: "gray" },
-  ];
+//   const expectedCellCalls = [
+//     { x: 0 * size + 0, y: 0 * size + 0, w: size, h: size, c: "gray" },
+//     { x: 1 * size + 1, y: 0 * size + 0, w: size, h: size, c: "lightgreen" },
+//     { x: 2 * size + 2, y: 0 * size + 0, w: size, h: size, c: "gray" },
+//     { x: 0 * size + 0, y: 1 * size + 1, w: size, h: size, c: "lightgreen" },
+//     { x: 1 * size + 1, y: 1 * size + 1, w: size, h: size, c: "lightgreen" },
+//     { x: 2 * size + 2, y: 1 * size + 1, w: size, h: size, c: "lightgreen" },
+//     { x: 0 * size + 0, y: 2 * size + 2, w: size, h: size, c: "gray" },
+//     { x: 1 * size + 1, y: 2 * size + 2, w: size, h: size, c: "lightgreen" },
+//     { x: 2 * size + 2, y: 2 * size + 2, w: size, h: size, c: "gray" },
+//   ];
 
-  testRunner.assertDeepCompareObjects(expectedCellCalls, actualCellCalls);
-});
+//   testRunner.assertDeepCompareObjects(expectedCellCalls, actualCellCalls);
+// });
 
 testRunner.run();

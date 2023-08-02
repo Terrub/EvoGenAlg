@@ -181,7 +181,34 @@ export class Renderer {
     this.colorRenderer = this.colorRenderers[this.currentColourRenderIndex];
   }
 
-  displayGenome(genome) {
+  displayEntityData(entity) {
+    this.display.clear();
+
+    if (Utils.isUndefined(entity)) {
+      return;
+    }
+
+    const totalWidth = this.world.width * this.size;
+    const totalheight = this.world.height * this.size;
+    const padding = 10;
+    const containerWidth = (this.size * 3 * 3 + 2) * 2 + padding;
+    const containerHeight = totalheight;
+
+    this.display.drawRect(
+      totalWidth - containerWidth,
+      0,
+      containerWidth,
+      containerHeight,
+      "#333"
+    );
+    this.displayGenome(
+      entity.genome,
+      totalWidth - containerWidth + padding,
+      padding
+    );
+  }
+
+  displayGenome(genome, x, y) {
     // The genome segment       0 1 0
     // only contains the        1   1
     // corona of the cell:  ->  0 1 0
@@ -192,17 +219,33 @@ export class Renderer {
     // which should always be
     // active. Hence we just
     // insert a 1 there.
-    const corona = genome.substr(0, 8);
-    const segment = corona.substring(0, 4) + "1" + corona.substring(4, 8);
-    const size = this.size;
+    const n = Math.ceil(genome.length / 16);
+    const size = this.size * 3 * 3 + 2;
+
+    for (let i = 0; i < n; i += 1) {
+      const traitCorona = genome.substr(i * 16, 8);
+      const outputCorona = genome.substr(i * 16 + 8, 8);
+
+      const traitSegment =
+        traitCorona.substr(0, 4) + "1" + traitCorona.substr(0 + 4, 8);
+      const outputSegment =
+        outputCorona.substr(0, 4) + "1" + outputCorona.substr(0 + 4, 8);
+
+      this.displaySegment(traitSegment, x, i * size + y);
+      this.displaySegment(outputSegment, x + size, i * size + y);
+    }
+  }
+
+  displaySegment(segment, x, y) {
+    const size = this.size * 2;
 
     for (let i = 0; i < 9; i += 1) {
       const c = segment[i] === "0" ? "gray" : "lightgreen";
       const xOff = i % 3;
       const yOff = Math.floor(i / 3);
-      const x = xOff * size + xOff;
-      const y = yOff * size + yOff;
-      this.display.drawRect(x, y, size, size, c);
+      const relX = xOff * size + xOff;
+      const relY = yOff * size + yOff;
+      this.display.drawRect(x + relX, y + relY, size, size, c);
     }
   }
 }

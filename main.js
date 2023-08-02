@@ -36,8 +36,13 @@ const canvas = document.getElementById("world_display_canvas");
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
+const hudCanvas = document.getElementById("hud_display_canvas");
+hudCanvas.width = hudCanvas.clientWidth;
+hudCanvas.height = hudCanvas.clientHeight;
+
 const size = 4;
 const glib = canvas.getContext("2d");
+const hudGlib = hudCanvas.getContext("2d");
 
 const { width, height } = canvas;
 const worldConfig = new WorldConfig();
@@ -49,8 +54,13 @@ worldConfig.maxEntityAge = 300;
 worldConfig.entityEnergy = Math.pow(2, 11);
 
 const display = new Display(glib, width, height);
+const hudDisplay = new Display(hudGlib, width, height);
+
 const world = new World(worldConfig);
+
 const renderer = new Renderer(display, world, size);
+const hudRenderer = new Renderer(hudDisplay, world, size);
+
 let currentGeneration = 0;
 
 function renderWorld() {
@@ -77,8 +87,8 @@ const worldView = document.getElementById("world_view");
 
 worldView.addEventListener("click", (event) => {
   if (mainloop.isAnimating()) {
-    // Early return for now
     // TODO: Consider different click functionality when animating
+    // Early return for now
     return event;
   }
 
@@ -88,9 +98,11 @@ worldView.addEventListener("click", (event) => {
   const index = world.getIndexFromPosition(scaledX, scaledY);
   const entities = world.getEntitiesList();
   const entity = entities[index];
+
+  hudRenderer.displayEntityData(entity);
+
   if (Utils.isDefined(entity)) {
     console.log(entity);
-    World.visualiseGenomeInConsole(entity.genome);
   }
 });
 

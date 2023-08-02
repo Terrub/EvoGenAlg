@@ -338,4 +338,28 @@ worldTests.addTest("World.getPositionFromIndex", () => {
   testRunner.assertDeepCompareObjects(expected, actual);
 });
 
+worldTests.addTest("World.getIndexFromPosition", () => {
+  const world = new World(fixtureThreeByThreeWorldConfig());
+  const positions = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 2, y: 0 },
+    { x: 0, y: 1 },
+    { x: 1, y: 1 },
+    { x: 2, y: 1 },
+    { x: 0, y: 2 },
+    { x: 1, y: 2 },
+    { x: 2, y: 2 },
+  ];
+
+  const actual = [];
+  for (const position of positions) {
+    actual.push(world.getIndexFromPosition(position.x, position.y));
+  }
+
+  const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+  testRunner.assertDeepCompareObjects(expected, actual);
+});
+
 testRunner.run();

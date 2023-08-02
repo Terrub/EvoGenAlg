@@ -127,6 +127,10 @@ export class World {
     };
   }
 
+  getIndexFromPosition(x, y) {
+    return y * this.width + x;
+  }
+
   static createGenome(numTraits) {
     let genome = "";
 

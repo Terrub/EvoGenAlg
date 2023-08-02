@@ -317,7 +317,7 @@ export class World {
       }
 
       // if (output[i] === "1" && this.getNumLivingEntities() < this.maxEntities) {
-      if (output[i] === "1") {
+      if (output[i] === "1" && 1 < entity.energy) {
         const spawnCost = entity.energy * 0.5;
         entity.reduceEnergy(spawnCost);
         let offspringGenome = entity.genome;

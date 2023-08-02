@@ -73,6 +73,26 @@ function renderWorld() {
 }
 
 const mainloop = createMainloop(renderWorld);
+const worldView = document.getElementById("world_view");
+
+worldView.addEventListener("click", (event) => {
+  if (mainloop.isAnimating()) {
+    // Early return for now
+    // TODO: Consider different click functionality when animating
+    return event;
+  }
+
+  const scaledX = Math.floor(event.offsetX / size);
+  const scaledY = Math.floor(event.offsetY / size);
+
+  const index = world.getIndexFromPosition(scaledX, scaledY);
+  const entities = world.getEntitiesList();
+  const entity = entities[index];
+  if (Utils.isDefined(entity)) {
+    console.log(entity);
+    World.visualiseGenomeInConsole(entity.genome);
+  }
+});
 
 document.getElementById("btn_next").onclick = () => renderWorld();
 document.getElementById("btn_start").onclick = () => mainloop.start();

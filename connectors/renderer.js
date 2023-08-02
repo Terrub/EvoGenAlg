@@ -180,4 +180,29 @@ export class Renderer {
 
     this.colorRenderer = this.colorRenderers[this.currentColourRenderIndex];
   }
+
+  displayGenome(genome) {
+    // The genome segment       0 1 0
+    // only contains the        1   1
+    // corona of the cell:  ->  0 1 0
+    // We want to display
+    // the whole thing:     ->  0 1 0
+    // So we need to insert     1 1 1
+    // the cell centre itself   0 1 0
+    // which should always be
+    // active. Hence we just
+    // insert a 1 there.
+    const corona = genome.substr(0, 8);
+    const segment = corona.substring(0, 4) + "1" + corona.substring(4, 8);
+    const size = this.size;
+
+    for (let i = 0; i < 9; i += 1) {
+      const c = segment[i] === "0" ? "gray" : "lightgreen";
+      const xOff = i % 3;
+      const yOff = Math.floor(i / 3);
+      const x = xOff * size + xOff;
+      const y = yOff * size + yOff;
+      this.display.drawRect(x, y, size, size, c);
+    }
+  }
 }

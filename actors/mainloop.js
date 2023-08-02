@@ -41,6 +41,9 @@ export function createMainloop(frameRender) {
       Utils.report("Animation stopped");
     },
     reset: function reset() {},
+    isAnimating: function isAnimating() {
+      return animating;
+    },
   };
 
   return protoMainloop;

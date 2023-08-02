@@ -6,19 +6,15 @@ import { Utils } from "../utils.js";
  */
 export class Renderer {
   display;
-
   world;
-
   size;
-
   colorRenderer;
-
   currentColourRenderIndex = 0;
-
   colorRenderers = [
+    Renderer.getColorFromSegmentByteAverage,
     Renderer.getColorFromTraitCountsSin,
     // Renderer.getColorFromTraitCountsLog,
-    Renderer.getColorFromSegmentByteAverage,
+    // Renderer.getDistinctGenomeColor,
   ];
 
   constructor(display, world, size) {
@@ -31,13 +27,12 @@ export class Renderer {
 
   static getByteAverage(byteSegment) {
     let total = 0;
-    const segmentLength = Math.min(8, byteSegment.length);
-    const maxValue = segmentLength ** 2 - 1;
+    const segmentLength = 8;
     const numBytes = (byteSegment.length / segmentLength) | 0;
 
     for (let i = 0; i < byteSegment.length; i += segmentLength) {
       const byte = byteSegment.substr(i, segmentLength);
-      total += (parseInt(byte, 2) / maxValue) * 255;
+      total += parseInt(byte, 2);
     }
 
     return (total / numBytes) | 0;
@@ -54,7 +49,7 @@ export class Renderer {
     // const yMin = Math.log(1);
     const yMin = 0;
 
-    return Math.E ^ (((num - 1) / (total - 1)) * ((yMax - yMin) + yMin));
+    return Math.E ^ (((num - 1) / (total - 1)) * (yMax - yMin + yMin));
   }
 
   static calcLogValue(num, total) {
@@ -100,17 +95,39 @@ export class Renderer {
   static getColorFromSegmentByteAverage(genome) {
     const numChannelSegments = (genome.length / 3) | 0;
 
-    const redSegment = genome.substr(0 * numChannelSegments, numChannelSegments);
-    const grnSegment = genome.substr(1 * numChannelSegments, numChannelSegments);
-    const bluSegment = genome.substr(2 * numChannelSegments, numChannelSegments);
+    const redSegment = genome.substr(
+      0 * numChannelSegments,
+      numChannelSegments
+    );
+    const grnSegment = genome.substr(
+      1 * numChannelSegments,
+      numChannelSegments
+    );
+    const bluSegment = genome.substr(
+      2 * numChannelSegments,
+      numChannelSegments
+    );
 
     const r = Renderer.getByteAverage(redSegment);
     const g = Renderer.getByteAverage(grnSegment);
     const b = Renderer.getByteAverage(bluSegment);
 
-    const color = `rgb(${r},${g},${b})`;
+    let color = "white";
+
+    if (0 < r || 0 < g || 0 < b) {
+      color = `rgb(${r},${g},${b})`;
+    }
 
     return color;
+  }
+
+  static getDistinctGenomeColor(genome) {
+    // const value = parseInt(genome, 2);
+    const r = Utils.generateRandomNumber(256);
+    const g = Utils.generateRandomNumber(256);
+    const b = Utils.generateRandomNumber(256);
+
+    return `rgb(${r},${g},${b})`;
   }
 
   static getColorFromTraitCountsSin(genome) {
@@ -132,24 +149,33 @@ export class Renderer {
     const { display, world, size } = this;
 
     display.clear();
+    const entities = world.getEntitiesList();
+    const n = entities.length;
 
-    world.getEntitiesList().forEach((entity, index) => {
-      if (entity.state === Entity.STATE_ALIVE) {
-        const { genome } = entity;
-        const color = this.colorRenderer(genome);
-        const { x, y } = world.getPositionFromIndex(index);
-        display.drawRect(x * size, y * size, size, size, color);
+    for (let i = 0; i < n; i += 1) {
+      const entity = entities[i];
+      if (!entity) {
+        continue;
       }
-    });
+      let color = "#333";
+      if (Entity.STATE_ALIVE === entity.state) {
+        color = this.colorRenderer(entity.genome);
+      }
 
-    const { max, min, avg } = world.getGenomeStats();
-    document.getElementById('max_gnome').textContent = max;
-    document.getElementById('min_gnome').textContent = min;
-    document.getElementById('avg_gnome').textContent = avg;
+      const { x, y } = world.getPositionFromIndex(i);
+      display.drawRect(x * size, y * size, size, size, color);
+    }
+
+    const { max, min, avg, nrg } = world.getGenomeStats();
+    document.getElementById("max_gnome").textContent = max;
+    document.getElementById("min_gnome").textContent = min;
+    document.getElementById("avg_gnome").textContent = avg;
+    document.getElementById("tot_energy").textContent = Math.round(nrg);
   }
 
   toggleColorRenderer() {
-    const newIndex = (this.currentColourRenderIndex + 1) % this.colorRenderers.length;
+    const newIndex =
+      (this.currentColourRenderIndex + 1) % this.colorRenderers.length;
     this.currentColourRenderIndex = newIndex;
 
     this.colorRenderer = this.colorRenderers[this.currentColourRenderIndex];

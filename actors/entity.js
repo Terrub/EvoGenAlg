@@ -7,15 +7,19 @@ export class Entity {
 
   energy;
 
-  constructor(genome, energy = 9) {
+  constructor(genome, energy = 0) {
     this.age = 0;
     this.genome = genome;
     this.energy = energy;
   }
 
-  static get STATE_ALIVE() { return 0; }
+  static get STATE_ALIVE() {
+    return 0;
+  }
 
-  static get STATE_DEAD() { return 1; }
+  static get STATE_DEAD() {
+    return 1;
+  }
 
   increaseAge() {
     this.age += 1;
@@ -26,6 +30,10 @@ export class Entity {
   }
 
   reduceEnergy(delta = 1) {
+    if (0 === this.energy) {
+      return;
+    }
+
     this.energy -= delta;
   }
 }

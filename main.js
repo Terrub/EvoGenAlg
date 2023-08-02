@@ -2,12 +2,11 @@
     no-bitwise: ["error", { "allow": ["|"] }]
  */
 
-import { Display } from './actors/display.js';
-import { createMainloop } from './actors/mainloop.js';
-import { World } from './actors/world.js';
-import { Entity } from './actors/entity.js';
-import { Renderer } from './connectors/renderer.js';
-import { Utils } from './utils.js';
+import { Display } from "./actors/display.js";
+import { createMainloop } from "./actors/mainloop.js";
+import { World } from "./actors/world.js";
+import { Renderer } from "./connectors/renderer.js";
+import { WorldConfig } from "./actors/worldConfig.js";
 
 /*
   Thoughts:
@@ -32,89 +31,53 @@ import { Utils } from './utils.js';
         that have more than one oppertunity to overpower them.
 */
 
-const canvas = document.getElementById('test_canvas');
+const canvas = document.getElementById("test_canvas");
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
-const size = 5;
-const glib = canvas.getContext('2d');
-const { width, height } = canvas;
-let entityUpdateAmount = 100;
-const entityUpdateAmountStepSize = 100;
-const worldWidth = (width / size | 0); // width
-const worldHeight = (height / size | 0); // height
-const maxEntities = 500;
-const maxNumTraits = 5;
-const minNumTraits = 1;
-const chanceToMutate = 0.09;
-const startingEntities = [];
+const size = 4;
+const glib = canvas.getContext("2d");
 
-// Create starting entities
-for (let i = 0; i < maxEntities; i += 1) {
-  const index = (Math.random() * worldWidth * worldHeight) | 0;
-  const numTraits = 2 * Utils.generateRandomNumber(maxNumTraits, minNumTraits);
-  startingEntities[index] = new Entity(World.createGenome(numTraits));
-}
+const { width, height } = canvas;
+const worldConfig = new WorldConfig();
+worldConfig.width = (width / size) | 0;
+worldConfig.height = (height / size) | 0;
+worldConfig.maxNumTraits = 20;
+worldConfig.chanceToMutate = 0.01;
+worldConfig.maxEntityAge = 800;
+worldConfig.entityEnergy = Math.pow(2, 11);
 
 const display = new Display(glib, width, height);
-const world = new World(
-  worldWidth,
-  worldHeight,
-  maxEntities,
-  maxNumTraits,
-  minNumTraits,
-  chanceToMutate,
-  startingEntities,
-);
+const world = new World(worldConfig);
 const renderer = new Renderer(display, world, size);
 let currentGeneration = 0;
-let entityIndices = [];
 
 function renderWorld() {
-  // debugger;
-  // if (entityIndices.length === 0) {
-  //   entityIndices = world.sortEntitiesByGenomeLength(world.getEntitiesList().slice());
-  //   currentGeneration += 1;
-  // }
-  // const chunkEntityIndices = entityIndices.splice(0, entityUpdateAmount);
-  // world.calculateNextGeneration(chunkEntityIndices);
-  world.calculateNextGeneration(world.sortEntitiesByGenomeLength(world.getEntitiesList().slice()));
+  const sortedEntityIndices = world.sortEntitiesByGenomeLength(
+    world.getEntitiesList()
+  );
+
+  world.calculateNextGeneration(sortedEntityIndices);
   currentGeneration += 1;
-  // world.removeDeadEntities();
-  world.spawnNewEntities();
+  world.spawnNewEntities(0.00005);
   renderer.renderCurrentState();
 
-  // document.getElementById('btn_speed_up').disabled = (entityUpdateAmount + entityUpdateAmountStepSize > world.maxEntities);
-  // document.getElementById('btn_speed_down').disabled = (entityUpdateAmount - entityUpdateAmountStepSize < 1);
-  document.getElementById('entity_count').textContent = world.getNumLivingEntities();
-  document.getElementById('generation_count').textContent = currentGeneration;
+  const entityCount = world.getNumLivingEntities();
+  document.getElementById("entity_count").textContent = entityCount;
+  document.getElementById("generation_count").textContent = currentGeneration;
+
+  if (entityCount < 1) {
+    mainloop.stop();
+    // world.spawnNewEntities();
+  }
 }
 
 const mainloop = createMainloop(renderWorld);
 
-document.getElementById('btn_next').onclick = () => renderWorld();
-document.getElementById('btn_start').onclick = () => mainloop.start();
-document.getElementById('btn_stop').onclick = () => mainloop.stop();
-// document.getElementById('btn_speed_up').onclick = () => {
-//   if (entityUpdateAmount + entityUpdateAmountStepSize <= world.maxEntities) {
-//     entityUpdateAmount += entityUpdateAmountStepSize;
-//   }
-// };
-// document.getElementById('btn_speed_down').onclick = () => {
-//   if (entityUpdateAmount - entityUpdateAmountStepSize > 1) {
-//     entityUpdateAmount -= entityUpdateAmountStepSize;
-//   }
-// };
-// document.getElementById('btn_max_ent_up').onclick = () => {
-//   if (world.maxEntities + 100 <= world.numCells) {
-//     world.maxEntities += 100;
-//   }
-// };
-// document.getElementById('btn_max_ent_down').onclick = () => {
-//   if (world.maxEntities > 100) {
-//     world.maxEntities -= 100;
-//   }
-// };
-document.getElementById('btn_colors').onclick = () => renderer.toggleColorRenderer();
+document.getElementById("btn_next").onclick = () => renderWorld();
+document.getElementById("btn_start").onclick = () => mainloop.start();
+document.getElementById("btn_stop").onclick = () => mainloop.stop();
+document.getElementById("btn_colors").onclick = () =>
+  renderer.toggleColorRenderer();
 
 mainloop.start();

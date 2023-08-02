@@ -1,85 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<head>
-
+  <head>
     <!-- Meta data stuff -->
     <meta charset="utf-8" />
     <title>Pixies</title>
+    <link rel="stylesheet" href="default-theme.css" />
     <script type="module" src="./main.js"></script>
+  </head>
 
-    <style type="text/css">
-        html {
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            color: white;
-            margin: 0;
-            padding: 0;
-            background-color: black;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        canvas {
-            background-color: #161616;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: absolute;
-            z-index: -1;
-        }
-
-        button,
-        input {
-            width: 5em;
-            height: 2em;
-            border-radius: 0.5em;
-            padding: 0.35em;
-            text-align: center;
-            opacity: 50%;
-        }
-
-        input {
-            padding: 0;
-        }
-
-        input:invalid {
-            border: 1px solid red;
-        }
-
-        input:valid {
-            border: 1px solid green;
-        }
-    </style>
-</head>
-
-<body>
+  <body>
     <canvas id="test_canvas"></canvas>
     <div>
-        <button id="btn_next">>>></button>
-        <button id="btn_start">Start</button>
-        <button id="btn_stop">Stop</button>
-        <!-- <button id="btn_speed_up">Faster</button>
+      <button id="btn_next">>>></button>
+      <button id="btn_start">Start</button>
+      <button id="btn_stop">Stop</button>
+      <!-- <button id="btn_speed_up">Faster</button>
         <button id="btn_speed_down">Slower</button>
         <button id="btn_max_ent_up">More</button>
         <button id="btn_max_ent_down">Fewer</button> -->
-        <button id="btn_colors">Colors</button>
-        <!-- FPS: <span name="frame_rate"></span> -->
-        <label>
-            Entities: <span id="entity_count">0</span>
-            Generation: <span id="generation_count">0</span>
-            Max: <span id="max_gnome">0</span>
-            Min: <span id="min_gnome">0</span>
-            Avg: <span id="avg_gnome">0</span>
-        </label>
+      <button id="btn_colors">Colors</button>
+      <!-- FPS: <span name="frame_rate"></span> -->
+      <label>
+        Entities: <span id="entity_count" class="hud-val">0</span> Generation:
+        <span id="generation_count" class="hud-val">0</span> Max:
+        <span id="max_gnome" class="hud-val">0</span> Min:
+        <span id="min_gnome" class="hud-val">0</span> Avg:
+        <span id="avg_gnome" class="hud-val">0</span> Nrg:
+        <span id="tot_energy" class="hud-val">0</span>
+      </label>
     </div>
-</body>
-
+  </body>
 </html>

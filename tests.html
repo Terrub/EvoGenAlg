@@ -1,57 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<head>
-
+  <head>
     <!-- Meta data stuff -->
     <meta charset="utf-8" />
     <title>Pixies test page</title>
-    <script type="module" src="tests/testRunner.js"></script>
+    <link rel="stylesheet" href="default-theme.css">
+    <!-- <script type="module" src="./testBot/example_tests.js"></script> -->
+    <script type="module" src="./tests/displayTests.js"></script>
+    <script type="module" src="./tests/worldTests.js"></script>
+    <script type="module" src="./tests/rendererTests.js"></script>
+  </head>
 
-    <style type="text/css">
-        html {
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            color: white;
-            margin: 0;
-            padding: 0;
-            background-color: black;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        button,
-        input {
-            width: 5em;
-            height: 2em;
-            border-radius: 0.5em;
-            padding: 0.35em;
-            text-align: center;
-            opacity: 50%;
-        }
-
-        input {
-            padding: 0;
-        }
-
-        input:invalid {
-            border: 1px solid red;
-        }
-
-        input:valid {
-            border: 1px solid green;
-        }
-    </style>
-</head>
-
-<body>
-</body>
-
+  <body class="testResults"></body>
 </html>

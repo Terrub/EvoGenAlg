@@ -310,7 +310,7 @@ worldTests.addTest("World.sortEntitiesByGenomeLength", () => {
 
   const actual = world.sortEntitiesByGenomeLength(entities);
 
-  const expected = [0, 2, 3, 1];
+  const expected = [1, 3, 2, 0];
 
   testRunner.assertDeepCompareObjects(expected, actual);
 });

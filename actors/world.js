@@ -222,7 +222,7 @@ export class World {
       }
     }
 
-    listToOrder.sort((a, b) => a[1] - b[1]);
+    listToOrder.sort((a, b) => b[1] - a[1]);
 
     for (const entry of listToOrder) {
       listOfIndices.push(entry[0]);

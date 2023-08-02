@@ -60,7 +60,7 @@ function renderWorld() {
 
   world.calculateNextGeneration(sortedEntityIndices);
   currentGeneration += 1;
-  world.spawnNewEntities(0.0001);
+  world.spawnNewEntities(0.00001);
   renderer.renderCurrentState();
 
   const entityCount = world.getNumLivingEntities();

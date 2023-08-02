@@ -57,7 +57,7 @@ function renderWorld() {
     world.getEntitiesList()
   );
 
-  world.calculateNextGeneration(sortedEntityIndices);
+  world.calculateNextGenerationV2(sortedEntityIndices);
   currentGeneration += 1;
   world.spawnNewEntities(0.00005);
   renderer.renderCurrentState();

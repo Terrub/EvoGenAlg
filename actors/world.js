@@ -376,6 +376,38 @@ export class World {
     }
   }
 
+  calculateNextGenerationV2(entityIndices) {
+    for (const index of entityIndices) {
+      const entity = this.entitiesList[index];
+      if (Utils.isUndefined(entity)) {
+        continue;
+      }
+
+      // Entity decomposed, no energy left.
+      if (0 >= entity.energy) {
+        this.executeEntityAtIndex(index);
+        continue;
+      }
+
+      if (Entity.STATE_ALIVE === entity.state) {
+        const trait = World.getCurrentActiveTraitForEntity(entity);
+        const ground = this.getOctetAtIndex(index);
+        if (World.traitMatchesGround(trait, ground)) {
+          const output = World.getCurrentActiveOutputForEntity(entity);
+          this.applyOutputToGeneration(index, output, entity);
+        }
+
+        entity.increaseAge();
+
+        if (this.entityShouldDie(entity)) {
+          this.killOffEntity(entity);
+        }
+      }
+
+      entity.reduceEnergy();
+    }
+  }
+
   spawnNewEntities(chanceToSpawn = 0.001) {
     // Always plant at least one white blossom tree for serenity
     this.addEntityAtIndex(

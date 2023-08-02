@@ -371,7 +371,9 @@ export class World {
       const ground = this.getOctetAtIndex(index);
       if (World.traitMatchesGround(trait, ground)) {
         const output = World.getCurrentActiveOutputForEntity(entity);
-        this.applyOutputToGeneration(index, output, entity);
+        if (output.length === 8) {
+          this.applyOutputToGeneration(index, output, entity);
+        }
       }
     }
   }

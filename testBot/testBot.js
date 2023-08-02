@@ -95,7 +95,10 @@ export class TestBot {
 
       if (TestBot.TEST_FAILED === this.result) {
         console.log(
-          `"${test.name}" failed:\n\tExpected: ${this.expected}\n\tActual: ${this.actual}`
+          `"${test.name}" failed:\n\tExpected:\n\t\t`,
+          this.expected,
+          "\n\tActual:\n\t\t",
+          this.actual
         );
       }
 
@@ -136,15 +139,15 @@ export class TestBot {
 
   assertInRange(min, actual, max) {
     if (!Utils.isNumber(actual)) {
-      throw new TypeError('Given value must be of type number');
+      throw new TypeError("Given value must be of type number");
     }
 
     if (!Utils.isNumber(min)) {
-      throw new TypeError('Minimum range value must be of type number');
+      throw new TypeError("Minimum range value must be of type number");
     }
-    
+
     if (!Utils.isNumber(max)) {
-      throw new TypeError('Maximum range value must be of type number');
+      throw new TypeError("Maximum range value must be of type number");
     }
 
     this.expected = `${min} - ${max}`;

@@ -89,7 +89,7 @@ function renderWorld() {
     world.getEntitiesList()
   );
 
-  world.calculateNextGenerationV2(sortedEntityIndices);
+  world.calculateNextGeneration(sortedEntityIndices);
   currentGeneration += 1;
   world.spawnNewEntities(0.0001);
   renderer.renderCurrentState();

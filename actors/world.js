@@ -349,42 +349,6 @@ export class World {
         continue;
       }
 
-      entity.increaseAge();
-      entity.reduceEnergy();
-
-      // Entity decomposed, no energy left.
-      if (0 >= entity.energy) {
-        this.executeEntityAtIndex(index);
-      }
-
-      if (Entity.STATE_DEAD === entity.state) {
-        continue;
-      }
-
-      if (this.entityShouldDie(entity)) {
-        this.killOffEntity(entity);
-        // this.executeEntityAtIndex(index);
-        continue;
-      }
-
-      const trait = World.getCurrentActiveTraitForEntity(entity);
-      const ground = this.getOctetAtIndex(index);
-      if (World.traitMatchesGround(trait, ground)) {
-        const output = World.getCurrentActiveOutputForEntity(entity);
-        if (output.length === 8) {
-          this.applyOutputToGeneration(index, output, entity);
-        }
-      }
-    }
-  }
-
-  calculateNextGenerationV2(entityIndices) {
-    for (const index of entityIndices) {
-      const entity = this.entitiesList[index];
-      if (Utils.isUndefined(entity)) {
-        continue;
-      }
-
       // Entity decomposed, no energy left.
       if (0 >= entity.energy) {
         this.executeEntityAtIndex(index);

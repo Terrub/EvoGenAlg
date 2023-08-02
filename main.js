@@ -7,6 +7,8 @@ import { createMainloop } from "./actors/mainloop.js";
 import { World } from "./actors/world.js";
 import { Renderer } from "./connectors/renderer.js";
 import { WorldConfig } from "./actors/worldConfig.js";
+import { Entity } from "./actors/entity.js";
+import { Utils } from "./utils.js";
 
 /*
   Thoughts:
@@ -43,9 +45,39 @@ const worldConfig = new WorldConfig();
 worldConfig.width = (width / size) | 0;
 worldConfig.height = (height / size) | 0;
 worldConfig.maxNumTraits = 20;
-worldConfig.chanceToMutate = 0.01;
-worldConfig.maxEntityAge = 800;
+worldConfig.chanceToMutate = 0.005;
+worldConfig.maxEntityAge = 300;
 worldConfig.entityEnergy = Math.pow(2, 11);
+
+// const initialEntities = [];
+// for (let i = 0; i < 20; i += 1) {
+//   /*
+//     0 0 0    0 0 0
+//     0   0 => 0   1
+//     0 0 0    0 1 1
+
+//     0 0 0    0 0 0
+//     1   0 => 1   0
+//     1 1 0    1 1 0
+
+//     0 1 1    0 1 1
+//     0   1 => 0   1
+//     0 0 0    0 0 0
+
+//     1 1 0    1 1 0
+//     1   0 => 1   0
+//     0 0 0    0 0 0
+
+//     0 0 0    0 0 0
+//     0   1 => 0   1
+//     0 1 1    0 1 1
+
+//   */
+//   const genome = "00000000000010110001011000010110011010000110100011010000110100000000101100001011"
+//   const randomIndex = Utils.generateRandomNumber(worldConfig.width * worldConfig.height);
+//   initialEntities[randomIndex] = new Entity(genome, worldConfig.entityEnergy);
+// }
+// worldConfig.entities = initialEntities;
 
 const display = new Display(glib, width, height);
 const world = new World(worldConfig);
@@ -59,7 +91,7 @@ function renderWorld() {
 
   world.calculateNextGenerationV2(sortedEntityIndices);
   currentGeneration += 1;
-  world.spawnNewEntities(0.00005);
+  world.spawnNewEntities(0.0001);
   renderer.renderCurrentState();
 
   const entityCount = world.getNumLivingEntities();
@@ -68,7 +100,6 @@ function renderWorld() {
 
   if (entityCount < 1) {
     mainloop.stop();
-    // world.spawnNewEntities();
   }
 }
 

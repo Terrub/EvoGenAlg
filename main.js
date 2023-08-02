@@ -33,7 +33,7 @@ import { Utils } from "./utils.js";
         that have more than one oppertunity to overpower them.
 */
 
-const canvas = document.getElementById("test_canvas");
+const canvas = document.getElementById("world_display_canvas");
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 

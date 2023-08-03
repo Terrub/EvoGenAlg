@@ -50,7 +50,7 @@ worldConfig.width = (width / size) | 0;
 worldConfig.height = (height / size) | 0;
 worldConfig.maxNumTraits = 20;
 worldConfig.chanceToMutate = 0.005;
-worldConfig.maxEntityAge = 300;
+worldConfig.maxEntityAge = 250;
 worldConfig.entityEnergy = Math.pow(2, 11);
 
 const display = new Display(glib, width, height);
@@ -70,7 +70,7 @@ function renderWorld() {
 
   world.calculateNextGeneration(sortedEntityIndices);
   currentGeneration += 1;
-  world.spawnNewEntities(0.00001);
+  world.spawnNewEntities(0.0001);
   renderer.renderCurrentState();
 
   const entityCount = world.getNumLivingEntities();

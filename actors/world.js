@@ -33,6 +33,7 @@ export class World {
     this.maxEntityAge = worldConfig.maxEntityAge;
     this.entitiesList = worldConfig.entities;
     this.entityEnergy = worldConfig.entityEnergy;
+    this.spawnChanceModifier = worldConfig.spawnChanceModifier;
 
     this.numCells = this.width * this.height;
     this.maxEntities = this.numCells;
@@ -385,7 +386,7 @@ export class World {
       Utils.generateRandomNumber(this.numCells)
     );
 
-    let numAttempts = this.numCells * 0.5;
+    let numAttempts = this.numCells * this.spawnChanceModifier;
     for (numAttempts; numAttempts > 0; numAttempts -= 1) {
       const index = Utils.generateRandomNumber(this.numCells);
       if (

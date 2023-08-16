@@ -61,7 +61,14 @@ const world = new World(worldConfig);
 const renderer = new Renderer(display, world, size);
 const hudRenderer = new Renderer(hudDisplay, world, size);
 
+const oneDegree = 1 / 3600;
+
 let currentGeneration = 0;
+let chanceToSpawn = 0.001;
+
+function calcSeasonalChanceToSpawn(value) {
+  return (1 - Math.sin(value % 3600 * oneDegree * Math.PI)) * 0.001;
+}
 
 function renderWorld() {
   const sortedEntityIndices = world.sortEntitiesByGenomeLength(
@@ -70,12 +77,14 @@ function renderWorld() {
 
   world.calculateNextGeneration(sortedEntityIndices);
   currentGeneration += 1;
-  world.spawnNewEntities(0.0001);
+  chanceToSpawn = calcSeasonalChanceToSpawn(currentGeneration);
+  world.spawnNewEntities(chanceToSpawn);
   renderer.renderCurrentState();
 
   const entityCount = world.getNumLivingEntities();
   document.getElementById("entity_count").textContent = entityCount;
   document.getElementById("generation_count").textContent = currentGeneration;
+  document.getElementById("spawn_chance").textContent = `1:${Math.floor(1 / chanceToSpawn)}`;
 
   if (entityCount < 1) {
     mainloop.stop();

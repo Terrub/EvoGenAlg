@@ -5,6 +5,7 @@ export class WorldConfig {
   minNumTraits = 10;
   chanceToMutate = 0.01;
   maxEntityAge = 100;
-  entityEnergy = 300;
+  entityEnergy = 200;
   entities = [];
+  spawnChanceModifier = 0.25;
 }

@@ -40,11 +40,13 @@ const hudCanvas = document.getElementById("hud_display_canvas");
 hudCanvas.width = hudCanvas.clientWidth;
 hudCanvas.height = hudCanvas.clientHeight;
 
-const size = 4;
 const glib = canvas.getContext("2d");
 const hudGlib = hudCanvas.getContext("2d");
 
-const { width, height } = canvas;
+const width = canvas.clientWidth;
+const height = canvas.clientHeight;
+const size = Math.max(Math.ceil(width * 0.003), Math.ceil(height * 0.003));
+
 const worldConfig = new WorldConfig();
 worldConfig.width = (width / size) | 0;
 worldConfig.height = (height / size) | 0;
